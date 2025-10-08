@@ -16,7 +16,7 @@ const userSchema = new Schema({
 
   role: {
     type: String,
-    enum: ["boss", "minions", "user"],
+    enum: ["admin", "user"],
     default: "user",
   },
   password: {
@@ -42,19 +42,6 @@ const userSchema = new Schema({
     type: Boolean,
     default: true,
     select: false,
-  },
-  address: { type: String, required: [true, "Please provide an address"] },
-
-  phone: {
-    type: String,
-    required: [true, "Please provide a phone number"],
-    unique: true,
-    validate: {
-      validator: function (value) {
-        return validator.isMobilePhone(value, "en-NG"); // Validate Nigerian numbers
-      },
-      message: "Please provide a valid Nigerian phone number",
-    },
   },
 });
 userSchema.pre("save", async function (next) {

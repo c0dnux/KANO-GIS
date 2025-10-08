@@ -3,7 +3,7 @@ const app = express();
 const errorController = require("./controllers/errorController");
 require("dotenv").config();
 const AppError = require("./utils/appError");
-// const userRouter = require("./routes/userRoutes");
+const userRouter = require("./routes/userRoutes");
 // const productRouter = require("./routes/productRoutes");
 // const categoryRouter = require("./routes/categoryRoutes");
 // const viewRouter = require("./routes/viewRoutes");
@@ -91,6 +91,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 //data sanitization against NoSQL query injection
+app.use((req, _res, next) => {
+  Object.defineProperty(req, "query", {
+    ...Object.getOwnPropertyDescriptor(req, "query"),
+    value: req.query,
+    writable: true,
+  });
+
+  next();
+});
 app.use(ems());
 
 //Prevent parameter pollution
@@ -127,7 +136,7 @@ app.set("views", path.join(__dirname, "views"));
 // app.use("/", viewRouter);
 // app.use("/api/v1/cart", cartRouter);
 // app.use("/api/v1/order", orderRouter);
-// app.use("/api/v1/users", userRouter);
+app.use("/api/v1/users", userRouter);
 // app.use("/api/v1/products", productRouter);
 // app.use("/api/v1/category", categoryRouter);
 

@@ -4,10 +4,13 @@ const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
 const crypto = require("crypto");
 const { signTokenHandler } = require("./../utils/customfuncs");
-const Email = require("./../utils/emailBrevo");
+// const Email = require("./../utils/emailBrevo");
 const AppError = require("./../utils/appError");
 
+
 exports.signup = catchAsync(async (req, res, next) => {
+    console.log(req.body);
+    
   const allowed = [
     "name",
     "email",
@@ -24,7 +27,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create(gotten);
   const url = `${req.protocol}://${req.get("host")}/me`;
 
-  await new Email(newUser, url).sendWelcome();
+//   await new Email(newUser, url).sendWelcome();
   // const token = signToken(newUser._id);
   // res
   //   .status(201)
