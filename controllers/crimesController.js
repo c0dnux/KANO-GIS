@@ -3,6 +3,7 @@ const Crime = require("../models/crimeModel");
 const catchAsync = require("./../utils/catchAsync");
 const axios = require("axios");
 const AppError = require("../utils/appError");
+const { set } = require("mongoose");
 exports.reportCrime = catchAsync(async (req, res, next) => {
   console.log(req.body);
   const address = `${req.body.location.area} ${req.body.location.localGovernment} ${req.body.location.state}, Nigeria`;
@@ -46,5 +47,32 @@ exports.getAllCrimes = catchAsync(async (req, res, next) => {
     status: "success",
     results: crimes.length,
     data: crimes,
+  });
+});
+exports.getCrime = catchAsync(async (req, res, next) => {
+  const crime = await Crime.findOne({ reportId: req.params.reportId }).populate(
+    "reportedBy",
+    "name email"
+  );
+  if (!crime) {
+    return next(new AppError("No crime found with that ID", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    data: crime,
+  });
+});
+exports.crimeAuth = catchAsync(async (req, res, next) => {
+  const crime = await Crime.findOneAndUpdate(
+    { reportId: req.params.reportId },
+    { $set: { crimeAuth: req.body.crimeAuth } },
+    { new: true, runValidators: true }
+  );
+  if (!crime) {
+    return next(new AppError("No crime found with that ID", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    data: crime,
   });
 });

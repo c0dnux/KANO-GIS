@@ -33,7 +33,11 @@ const crimeReportSchema = new mongoose.Schema(
       enum: ["Unknown", "Under Investigation", "Resolved", "Closed"],
       default: "Unknown",
     },
-    confirmed: { type: Boolean, default: false },
+    crimeAuth: {
+      type: String,
+      enum: ["pending", "verified", "fake"],
+      default: "pending",
+    },
     location: {
       address: String,
       area: { type: String, required: [true, "Area is required"] },
