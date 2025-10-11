@@ -4,37 +4,50 @@ const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
 const crypto = require("crypto");
 const { signTokenHandler } = require("./../utils/customfuncs");
-// const Email = require("./../utils/emailBrevo");
+const Email = require("./../utils/emailBrevo");
 const AppError = require("./../utils/appError");
 
-
 exports.signup = catchAsync(async (req, res, next) => {
-    console.log(req.body);
-    
-  const allowed = [
-    "name",
-    "email",
-    "password",
-    "photo",
-    "confirmPassword",
-    "address",
-    "phone",
-  ];
+  console.log(process.env.EMAIL_FROM, process.env.MAILTRAP_TOKEN);
+
+  const allowed = ["name", "email", "password", "confirmPassword"];
   let gotten = {};
   allowed.forEach((elem) => {
     if (req.body[elem]) gotten[elem] = req.body[elem];
   });
-  const newUser = await User.create(gotten);
-  const url = `${req.protocol}://${req.get("host")}/me`;
+  console.log(gotten);
+  const newUser = new User(gotten);
+  const confirmToken = newUser.confirmTokenGen();
+  await newUser.save();
 
-//   await new Email(newUser, url).sendWelcome();
-  // const token = signToken(newUser._id);
-  // res
-  //   .status(201)
-  //   .json({ status: "Success", token, Number: newUser.length, data: newUser });
-  signTokenHandler(201, "user created", res, newUser);
+  const url = `${req.protocol}://${req.get("host")}/activateAccount/${confirmToken}`;
+
+  await new Email(newUser, url).sendWelcome();
+
+  signTokenHandler(201, "Confirm email to activate account", res, newUser);
 });
+exports.activateAccount = catchAsync(async (req, res, next) => {
+  const token = req.params.token;
+  const hashToken = crypto
+    .createHash("sha256")
+    .update(String(token))
+    .digest("hex");
+  const user = await User.findOne({
+    confirmToken: hashToken,
+    confirmTokenExpires: { $gt: Date.now() },
+  });
+  if (!user) {
+    return next(new AppError("Token is invalid or expired", 400));
+  }
+  user.confirmToken = undefined;
+  user.confirmTokenExpires = undefined;
+  user.active = true;
+  await user.save({ validateBeforeSave: false });
 
+  // const token = signToken(user._id);
+  // res.status(200).json({ status: "Success", token, data: user });
+  signTokenHandler(200, "Account activated", res, user);
+});
 exports.signin = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   console.log(email, password);
@@ -158,7 +171,7 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
   if (!user) {
     return next(new AppError("No user with the given email", 404));
   }
-  const resetToken = user.passwordReset();
+  const resetToken = user.confirmTokenGen();
 
   await user.save();
   const resetURL = `${req.protocol}://${req.get(
@@ -168,8 +181,8 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
     await new Email(user, resetURL).sendPasswordReset();
     res.status(200).json({ status: "Success", message: "Token sent to email" });
   } catch (error) {
-    user.passwordResetToken = undefined;
-    user.passwordResetExpires = undefined;
+    user.confirmToken = undefined;
+    user.confirmTokenExpires = undefined;
     await user.save({ validateBeforeSave: false });
 
     return next(new AppError("There was an error resetting password", 500));
@@ -184,15 +197,15 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     .digest("hex");
 
   const user = await User.findOne({
-    passwordResetToken: hashToken,
-    passwordResetExpires: { $gt: Date.now() },
+    confirmToken: hashToken,
+    confirmTokenExpires: { $gt: Date.now() },
   });
   if (!user) {
     return next(new AppError("Reset token is invalid or expired", 400));
   }
   user.password = req.body.password;
-  user.passwordResetToken = undefined;
-  user.passwordResetExpires = undefined;
+  user.confirmToken = undefined;
+  user.confirmTokenExpires = undefined;
   await user.save({ validateBeforeSave: false });
 
   // const token = signToken(user._id);

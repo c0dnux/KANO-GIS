@@ -36,11 +36,11 @@ const userSchema = new Schema({
     },
   },
   passwordChangedAt: Date,
-  passwordResetToken: String,
-  passwordResetExpires: String,
+  confirmToken: String,
+  confirmTokenExpires: String,
   active: {
     type: Boolean,
-    default: true,
+    default: false,
     select: false,
   },
 });
@@ -80,15 +80,15 @@ userSchema.methods.passwordChangedAfter = function (userTimeStamp) {
   }
   return false;
 };
-userSchema.methods.passwordReset = function () {
-  const resetToken = Math.floor(100000 + Math.random() * 900000);
-  this.passwordResetToken = crypto
+userSchema.methods.confirmTokenGen = function () {
+  const token = crypto.randomBytes(32).toString("hex");
+  this.confirmToken = crypto
     .createHash("sha256")
-    .update(String(resetToken))
+    .update(String(token))
     .digest("hex");
-  this.passwordResetExpires = Date.now() + 5 * 60 * 1000; // Token expires in 5 minutes
+  this.confirmTokenExpires = Date.now() + 5 * 60 * 1000; // Token expires in 5 minutes
 
-  return resetToken;
+  return token;
 };
 const User = mongoose.model("User", userSchema);
 

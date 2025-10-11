@@ -6,7 +6,7 @@ const AppError = require("./utils/appError");
 const userRouter = require("./routes/userRoutes");
 const crimeRouter = require("./routes/crimeRoutes");
 // const categoryRouter = require("./routes/categoryRoutes");
-// const viewRouter = require("./routes/viewRoutes");
+const viewRouter = require("./routes/viewRoutes");
 // const cartRouter = require("./routes/cartRoutes");
 // const orderRouter = require("./routes/orderRoutes");
 const rateLimit = require("express-rate-limit");
@@ -134,7 +134,7 @@ app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 //Routes
 
-// app.use("/", viewRouter);
+app.use("/", viewRouter);
 // app.use("/api/v1/cart", cartRouter);
 // app.use("/api/v1/order", orderRouter);
 app.use("/api/v1/users", userRouter);
