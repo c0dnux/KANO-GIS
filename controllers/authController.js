@@ -8,19 +8,44 @@ const Email = require("./../utils/emailBrevo");
 const AppError = require("./../utils/appError");
 
 exports.signup = catchAsync(async (req, res, next) => {
-  console.log(process.env.EMAIL_FROM, process.env.MAILTRAP_TOKEN);
-
   const allowed = ["name", "email", "password", "confirmPassword"];
   let gotten = {};
   allowed.forEach((elem) => {
     if (req.body[elem]) gotten[elem] = req.body[elem];
   });
-  console.log(gotten);
+  const existingUser = await User.findOne({ email: gotten.email });
+  if (existingUser) {
+    if (existingUser.active) {
+      return next(
+        new AppError("This email is already registered. Please log in.", 409)
+      ); // 409 Conflict
+    }
+    const confirmToken = existingUser.confirmTokenGen();
+    existingUser.name = gotten.name;
+    existingUser.newPassword = gotten.password;
+    existingUser.confirmPassword = gotten.confirmPassword;
+
+    await existingUser.save();
+
+    const url = `${req.protocol}://${req.get(
+      "host"
+    )}/activateAccount/${confirmToken}`;
+    await new Email(existingUser, url).sendWelcome();
+    return signTokenHandler(
+      200,
+      "Confirmation email resent. Please check your inbox.",
+      res,
+      existingUser
+    );
+  }
+
   const newUser = new User(gotten);
   const confirmToken = newUser.confirmTokenGen();
   await newUser.save();
 
-  const url = `${req.protocol}://${req.get("host")}/activateAccount/${confirmToken}`;
+  const url = `${req.protocol}://${req.get(
+    "host"
+  )}/activateAccount/${confirmToken}`;
 
   await new Email(newUser, url).sendWelcome();
 
