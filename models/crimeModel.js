@@ -39,20 +39,23 @@ const crimeReportSchema = new mongoose.Schema(
       default: "pending",
     },
     location: {
-      address: String,
-      area: { type: String, required: [true, "Area is required"] },
+      address: { type: String, required: [true, "Address is required"] },
+      city: { type: String, required: [true, "Area is required"] },
       localGovernment: String,
       state: { type: String, default: "Kano" },
       coordinates: {
-        lat: Number,
-        lon: Number,
+        type: {
+          type: String,
+          enum: ["Point"],
+          default: "Point",
+        },
+        coordinates: {
+          type: [Number], // [longitude, latitude]
+          required: true,
+        },
       },
     },
-    victim: {
-      name: String,
-      gender: { type: String, enum: ["Male", "Female"] },
-      age: Number,
-    },
+    victims: Number,
 
     reportedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -61,7 +64,7 @@ const crimeReportSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+crimeReportSchema.index({ location: "2dsphere" });
 const CrimeReport = mongoose.model("CrimeReport", crimeReportSchema);
 
 module.exports = CrimeReport;
