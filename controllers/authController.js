@@ -87,7 +87,7 @@ exports.signin = catchAsync(async (req, res, next) => {
   }
 
   if (!user.active) {
-    return next(new AppError("This acount is deleted", 401));
+    return next(new AppError("This acount is deleted or not activated.", 401));
   }
   const isCorrect = await user.isCorrectPassword(password, user.password);
 

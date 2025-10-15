@@ -1,0 +1,130 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title Crime Repo - Crime Map
+        
+        //- Google Fonts
+        link(rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/css2?display=swap&family=Public+Sans:wght@400;500;700;900")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined")
+
+        //- TailwindCSS Play CDN (for development)
+        script(src="https://cdn.tailwindcss.com?plugins=forms,container-queries")
+        //-Tailwind for prod
+        //- link(rel="stylesheet" href="/output.css")
+        script(src="/js/tailwindjs.js") 
+
+        //- Leaflet & MarkerCluster CSS from CDNJS with CORRECTED integrity hashes
+        link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" integrity="sha512-Zcn6bjR/8RZbLEpLIeOwNtzREBAJnUKESxces60Mpoj+2okopSAcSUIUOseddDm0cxnGQzxIR7vJgsLZbdLE3w==" crossorigin="anonymous" referrerpolicy="no-referrer")
+        link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" integrity="sha512-mQ77VzAakzdpWdgfL/lM1ksNy89uFgibRQANsNneSTMD/bj0Y/8+94XMwYhnbzx8eki2hrbPpDm0vD0CiT2lcg==" crossorigin="anonymous" referrerpolicy="no-referrer")
+        link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" integrity="sha512-6ZCLMiYwTeli2rVh3XAPxy3YoR5fVxGdH/pz+KMCzRY2M65Emgkw00Yqmhh8qLGeYQ3LbVZGdmOX9KUjSKr0TA==" crossorigin="anonymous" referrerpolicy="no-referrer")
+        
+        style.
+            /* Your inline styles remain the same */
+            .leaflet-control-container .leaflet-control {
+                background-color: rgba(255, 255, 255, 0.8) !important;
+                color: #333 !important;
+                border: 1px solid #ccc;
+            }
+            .dark .leaflet-control-container .leaflet-control {
+                background-color: rgba(30, 41, 59, 0.8) !important;
+                color: #f1f5f9 !important;
+                border: 1px solid #475569;
+            }
+            .dark .leaflet-tile-pane {
+                filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+            }
+            .marker-cluster-small,
+            .marker-cluster-medium,
+            .marker-cluster-large {
+                background-color: rgba(17, 115, 212, 0.6) !important;
+            }
+            .marker-cluster-small div,
+            .marker-cluster-medium div,
+            .marker-cluster-large div {
+                background-color: rgba(17, 115, 212, 0.8) !important;
+                color: #fff;
+            }
+
+    body(class="bg-background-light dark:bg-background-dark font-display")
+        .flex.flex-col.min-h-screen
+            //- Your header code...
+            header(class="relative flex items-center justify-between whitespace-nowrap border-b border-primary/20 dark:border-primary/30 px-4 sm:px-6 lg:px-8 py-3")
+                .flex.items-center.gap-6
+                    .flex.items-center.gap-3.text-primary
+                        span(class="material-symbols-outlined text-3xl") local_police
+                        a(class="text-xl font-bold text-gray-900 dark:text-white" href="/HOME") Crime Repo
+                    nav#main-nav(class="hidden flex flex-col absolute top-full right-4 mt-2 w-48 bg-white dark:bg-slate-800 p-4 rounded-lg shadow-lg border border-primary/20 dark:border-primary/30 space-y-2 z-50 md:flex md:relative md:flex-row md:top-auto md:right-auto md:mt-0 md:w-auto md:bg-transparent md:p-0 md:shadow-none md:border-none md:space-y-0 md:gap-6")
+                        a(class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors" href="#") Dashboard
+                        a(class="text-sm font-medium text-primary dark:text-primary" href="#") Map
+                        a(class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors" href="#") Reports
+                        a(class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors" href="#") Analytics
+                .flex.items-center.gap-4
+                    div(class="hidden sm:flex items-center gap-2")
+                        button(class="p-2 rounded-full hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors" aria-label="View notifications")
+                            span(class="material-symbols-outlined text-gray-600 dark:text-gray-400") notifications
+                        button(class="p-2 rounded-full hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors" aria-label="Open settings")
+                            span(class="material-symbols-outlined text-gray-600 dark:text-gray-400") settings
+                    div(class="w-10 h-10 rounded-full bg-cover bg-center" style="background-image: url('https://randomuser.me/api/portraits/men/32.jpg')")
+                    button#menu-toggle(class="p-2 rounded-full md:hidden hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors")
+                        span(class="material-symbols-outlined text-gray-600 dark:text-gray-400") menu
+
+            main(class="flex-1 grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 sm:p-6 lg:p-8")
+                //- Your filters panel...
+                div(class="lg:col-span-1 xl:col-span-1 bg-white dark:bg-background-dark rounded-lg shadow-sm border border-primary/20 dark:border-primary/30 flex flex-col")
+                    div(class="p-4 border-b border-primary/20 dark:border-primary/30")
+                        h2(class="text-lg font-bold text-gray-900 dark:text-white") Filters
+                        p(class="text-sm text-gray-500 dark:text-gray-400") Refine the crimes displayed on the map.
+                    div(class="flex-1 p-4 space-y-6")
+                        div
+                            label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2") Crime Type
+                            #crime-type-filter(class="space-y-2 text-sm text-gray-800 dark:text-gray-200")
+                        div
+                            label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2") Date Range
+                            div(class="grid grid-cols-2 gap-4")
+                                div
+                                    label(class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1" for="date-from") From
+                                    input#date-from(class="w-full rounded border-primary/30 bg-background-light dark:bg-background-dark/50 focus:ring-primary focus:border-primary text-gray-900 dark:text-gray-200" type="date")
+                                div
+                                    label(class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1" for="date-to") To
+                                    input#date-to(class="w-full rounded border-primary/30 bg-background-light dark:bg-background-dark/50 focus:ring-primary focus:border-primary text-gray-900 dark:text-gray-200" type="date")
+                        div
+                            label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" for="location") Location
+                            select#location(class="w-full rounded border-primary/30 bg-background-light dark:bg-background-dark/50 focus:ring-primary focus:border-primary text-gray-900 dark:text-gray-200")
+                                option(value="All") All Local Governments
+                                option Fagge
+                                option Dala
+                                option Gwale
+                                option Kano Municipal
+                                option Tarauni
+                                option Nassarawa
+                                option Kumbotso
+                                option Ungogo
+                    div(class="p-4 border-t border-primary/20 dark:border-primary/30 space-y-4")
+                        button#apply-filters-btn(class="w-full bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors") Apply Filters
+                        button#remove-filters-btn(class="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors") Remove Filter
+
+                div(class="lg:col-span-2 xl:col-span-3 rounded-lg overflow-hidden relative shadow-lg h-[500px] lg:h-auto")
+                    //- FIX 3: Use proper Pug syntax to embed the JSON data.
+                    //- Assumes 'crimes' is passed from your server like: res.render('map', { crimes: crimesData })
+                    #map(class="h-full w-full" data-crimes=JSON.stringify(crimes))
+
+                    div(class="absolute top-0 right-0 p-4 z-[1000] flex flex-col items-end gap-2")
+                        div(class="flex flex-col rounded-lg bg-white/80 dark:bg-background-dark/80 backdrop-blur-sm shadow-md")
+                            button#zoom-in-btn(class="flex size-10 items-center justify-center rounded-t-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors" aria-label="Zoom in")
+                                span(class="material-symbols-outlined text-gray-800 dark:text-gray-200") add
+                            div(class="w-full h-px bg-primary/20 dark:bg-primary/30")
+                            button#zoom-out-btn(class="flex size-10 items-center justify-center rounded-b-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors" aria-label="Zoom out")
+                                span(class="material-symbols-outlined text-gray-800 dark:text-gray-200") remove
+                        button#locate-btn(class="flex size-10 items-center justify-center rounded-lg bg-white/80 dark:bg-background-dark/80 backdrop-blur-sm shadow-md hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors" aria-label="Find my location")
+                            span(class="material-symbols-outlined text-gray-800 dark:text-gray-200") my_location
+
+
+    //- JavaScript libraries at the end of the body with CORRECTED integrity hashes
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg==" crossorigin="anonymous" referrerpolicy="no-referrer")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js" integrity="sha512-OFs3W4DIZ5ZkrDhBFtsCP6JXtMEDGmhl0QPlmWYBJay40TT1n3gt2Xuw8Pf/iezgW9CdabjkNChRqozl/YADmg==" crossorigin="anonymous" referrerpolicy="no-referrer")
+    
+    //- Your custom scripts, which depend on the libraries above
+    script(type="module" src="/js/index.js")

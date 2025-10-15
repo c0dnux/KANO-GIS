@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const cors = require('cors');
 const errorController = require("./controllers/errorController");
 require("dotenv").config();
 const AppError = require("./utils/appError");
@@ -18,30 +19,50 @@ const cookieParser = require("cookie-parser");
 const hpp = require("hpp");
 const morgan = require("morgan");
 //            Global MiddleWares
-
+//////CORS
+app.use(cors({
+  origin: "http://localhost:3000", // or your frontend domain
+  credentials: true
+}));
 //Set security HTTP headers
 app.use(helmet());
+
+
+app.use(helmet());
+
 app.use(
   helmet.contentSecurityPolicy({
+    useDefaults: true,
     directives: {
       defaultSrc: ["'self'"],
+
+      // ✅ Allow inline & CDN scripts (Leaflet, Tailwind, Paystack, etc.)
       scriptSrc: [
         "'self'",
         "'unsafe-inline'",
+        "'unsafe-eval'", // Some libraries (like Leaflet clustering) need this
         "https://cdnjs.cloudflare.com",
         "https://cdn.jsdelivr.net",
         "https://unpkg.com",
         "https://js.paystack.co",
         "https://cdn.tailwindcss.com",
+        "https://api.mapbox.com", // If you later use Mapbox
+        "https://maps.googleapis.com", // For Google Maps JS API
+        "https://*.hereapi.com", // For HERE maps/geocoding
       ],
+
+      // ✅ Allow inline styles & Google Fonts
       styleSrc: [
         "'self'",
         "'unsafe-inline'",
         "https://cdnjs.cloudflare.com",
         "https://cdn.jsdelivr.net",
         "https://maxcdn.bootstrapcdn.com",
-        "https://fonts.googleapis.com", // ✅ Allow Google Fonts
+        "https://fonts.googleapis.com",
+        "https://unpkg.com", // For Leaflet CSS
       ],
+
+      // ✅ Allow loading fonts from Google Fonts & CDNs
       fontSrc: [
         "'self'",
         "https://fonts.gstatic.com",
@@ -50,16 +71,33 @@ app.use(
         "https://maxcdn.bootstrapcdn.com",
       ],
 
+      // ✅ Allow images from CDN, inline, blob, and HTTPS (useful for map tiles)
       imgSrc: [
         "'self'",
-        "data:", // Allows inline Base64 images
-        "https:", // Allows loading images from HTTPS sources
-        "blob:", // If you're using Blob URLs for images
+        "data:",
+        "blob:",
+        "https:",
+        "https://*.tile.openstreetmap.org",
+        "https://*.googleusercontent.com",
       ],
-      connectSrc: ["'self'"],
+
+      // ✅ Allow Leaflet map tile connections, HERE API, etc.
+      connectSrc: [
+        "'self'",
+        "https://*.openstreetmap.org",
+        "https://*.googleapis.com",
+        "https://*.hereapi.com",
+        "https://api.mapbox.com",
+        "https://events.mapbox.com",
+        "https://cdnjs.cloudflare.com", // <-- FIX: Add this line
+      ],
+
+      // ✅ Allow frames if you’re embedding Paystack or map widgets
+      frameSrc: ["'self'", "https://js.paystack.co"],
     },
   })
 );
+
 
 // Development Log
 

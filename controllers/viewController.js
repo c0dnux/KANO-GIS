@@ -75,3 +75,10 @@ exports.home = catchAsync(async (req, res, next) => {
   };
   res.status(200).render("index", data);
 });
+exports.mapView = catchAsync(async (req, res, next) => {
+  const crimedata = await Crime.find({ crimeAuth: "verified" });
+  res.status(200).render("map", { crimes: crimedata });
+});
+exports.login = catchAsync(async (req, res, next) => {
+  res.status(200).render("login");
+});

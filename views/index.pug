@@ -8,28 +8,7 @@ html(lang="en")
     link(rel="preconnect", href="https://fonts.googleapis.com")
     link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin)
     link(href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700;900&display=swap", rel="stylesheet")
-    script.
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              primary: "#1173d4",
-              "background-light": "#f6f7f8",
-              "background-dark": "#101922",
-            },
-            fontFamily: {
-              display: ["Public Sans"],
-            },
-            borderRadius: {
-              DEFAULT: "0.25rem",
-              lg: "0.5rem",
-              xl: "0.75rem",
-              full: "9999px",
-            },
-          },
-        },
-      };
+    script(src="/js/tailwindjs.js") 
     style.
       .material-symbols-outlined {
         font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
@@ -45,13 +24,14 @@ html(lang="en")
                 path(d="M36.7273 44C33.9891 44 31.6043 39.8386 30.3636 33.69C29.123 39.8386 26.7382 44 24 44C21.2618 44 18.877 39.8386 17.6364 33.69C16.3957 39.8386 14.0109 44 11.2727 44C7.25611 44 4 35.0457 4 24C4 12.9543 7.25611 4 11.2727 4C14.0109 4 16.3957 8.16144 17.6364 14.31C18.877 8.16144 21.2618 4 24 4C26.7382 4 29.123 8.16144 30.3636 14.31C31.6043 8.16144 33.9891 4 36.7273 4C40.7439 4 44 12.9543 44 24C44 35.0457 40.7439 44 36.7273 44Z", fill="currentColor")
             h1(class="text-2xl font-bold text-slate-900 dark:text-white")
               | Crime Repo
-          div(class="hidden md:flex items-center gap-8")
-            a(class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors", href="#") About
-            a(class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors", href="#") Features
-            a(class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors", href="#") Contact
+    
           .flex.items-center.gap-4
-            a(class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors font-medium", href="#") Login
-            a(class="bg-primary text-white px-4 py-2 rounded-lg font-bold hover:bg-opacity-90 transition-colors", href="#") Sign Up
+            if user
+              a(href="#")
+                img(src=`/policeman.png`, alt=user.name, class="w-10 h-10 rounded-full object-cover")
+            else
+              a(class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors font-medium", href="/login") Login
+              a(class="bg-primary text-white px-4 py-2 rounded-lg font-bold hover:bg-opacity-90 transition-colors", href="#") Sign Up
 
       main.flex-grow
         section(class="relative bg-cover bg-center h-[600px] flex items-center", style="background-image: linear-gradient(rgba(16, 25, 34, 0.7), rgba(16, 25, 34, 0.7)), url('/crime.jpg');")
@@ -61,58 +41,58 @@ html(lang="en")
             p.mt-4.max-w-2xl.mx-auto.text-lg.text-slate-200
               | The premier GIS-based crime analysis and reporting system for Kano State. Track, analyze, and combat crime with cutting-edge technology.
             .mt-8.flex.gap-4.justify-center
-              a(class="bg-primary text-white px-6 py-3 rounded-lg text-lg font-bold hover:bg-opacity-90 transition-transform transform hover:scale-105", href="#") Get Started
-              a(class="bg-white/10 text-white px-6 py-3 rounded-lg text-lg font-bold hover:bg-white/20 transition-colors", href="#") Learn More
+              a(class="bg-primary text-white px-6 py-3 rounded-lg text-lg font-bold hover:bg-opacity-90 transition-transform transform hover:scale-105", href="#") Report Crime
+              a(class="bg-white/10 text-white px-6 py-3 rounded-lg text-lg font-bold hover:bg-white/20 transition-colors", href="/map") Check Map
 
         section(class="py-16 md:py-24 bg-white dark:bg-slate-900/50")
-            .container.mx-auto.px-6
-                .text-center.mb-12
-                    h3(class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white")
-                        | Crime Rundown
-                    p(class="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto")
-                        | A comprehensive, real-time overview of the crime statistics and insights in Kano State.
-                div(class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto")
-                    .flex.flex-col.gap-8
-                        div(class="bg-background-light dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-6 shadow-md")
-                            div(class="flex-shrink-0 w-16 h-16 flex items-center justify-center rounded-full bg-primary/10 text-primary")
-                                svg(xmlns="http://www.w3.org/2000/svg", width="32", height="32", fill="currentColor", viewBox="0 0 256 256")
-                                    path(d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Z")
-                            div
-                                h4(class="text-xl font-bold text-slate-800 dark:text-white") Total Reports Filed
-                                p.text-5xl.font-black.text-primary.mt-1=totalCrimes
-                        div(class="bg-background-light dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-6 shadow-md")
-                            div(class="flex-shrink-0 w-16 h-16 flex items-center justify-center rounded-full bg-red-500/10 text-red-500")
-                                svg(xmlns="http://www.w3.org/2000/svg", width="32", height="32", fill="currentColor", viewBox="0 0 256 256")
-                                    path(d="M244.8,150.4a8,8,0,0,1-11.2-1.6A51.6,51.6,0,0,0,192,128a8,8,0,0,1-7.37-4.89,40,40,0,1,0-113.26,0A8,8,0,0,1,64,128a51.6,51.6,0,0,0-41.6,20.8,8,8,0,1,1-12.8-9.6A67.81,67.81,0,0,1,64,112a8,8,0,0,1,8-8,56,56,0,1,1,112,0,8,8,0,0,1,8,8,67.81,67.81,0,0,1,54.4,27.2A8,8,0,0,1,244.8,150.4Z")
-                            div
-                                h4(class="text-xl font-bold text-slate-800 dark:text-white") Total Victims Affected
-                                p.text-5xl.font-black.text-red-500.mt-1=totalVictims
-                    .flex.flex-col.gap-8
-                        div(class="bg-background-light dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 shadow-md")
-                            h4(class="text-xl font-bold text-slate-900 dark:text-white mb-4") Breakdown by Type
-                            .space-y-4
-                                if updatedBreakdown.length === 0
-                                    p(class="text-slate-600 dark:text-slate-300") No crime data available.
-                                each crime in updatedBreakdown
-                                    div
-                                        div(class="flex justify-between mb-1 text-sm font-medium text-slate-600 dark:text-slate-300")
-                                            span=crime._id
-                                            span=crime.count
-                                        div(class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5")
-                                            div(class=`${crime.color} h-2.5 rounded-full`, style=`width: ${crime.percentage}%`)
-                        div(class="bg-background-light dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 shadow-md")
-                            h4(class="text-xl font-bold text-slate-900 dark:text-white mb-4") Report Status Overview
-                            .space-y-4
-                                if updatedOverview.length === 0
-                                    p(class="text-slate-600 dark:text-slate-300") No status data available.
-                                each status in updatedOverview
-                                    div
-                                        div(class="flex justify-between mb-1 text-sm font-medium text-slate-600 dark:text-slate-300")
-                                            span=status._id
-                                            span=status.count
-                                        div(class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5")
-                                            div(class=`${status.color} h-2.5 rounded-full`, style=`width: ${status.percentage}%`)
-        
+          .container.mx-auto.px-6
+            .text-center.mb-12
+              h3(class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white")
+                | Crime Rundown
+              p(class="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto")
+                | A comprehensive, real-time overview of the crime statistics and insights in Kano State.
+            div(class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto")
+              .flex.flex-col.gap-8
+                div(class="bg-background-light dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-6 shadow-md")
+                  div(class="flex-shrink-0 w-16 h-16 flex items-center justify-center rounded-full bg-primary/10 text-primary")
+                    svg(xmlns="http://www.w3.org/2000/svg", width="32", height="32", fill="currentColor", viewBox="0 0 256 256")
+                      path(d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Z")
+                  div
+                    h4(class="text-xl font-bold text-slate-800 dark:text-white") Total Reports Filed
+                    p.text-5xl.font-black.text-primary.mt-1=totalCrimes
+                div(class="bg-background-light dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-6 shadow-md")
+                  div(class="flex-shrink-0 w-16 h-16 flex items-center justify-center rounded-full bg-red-500/10 text-red-500")
+                    svg(xmlns="http://www.w3.org/2000/svg", width="32", height="32", fill="currentColor", viewBox="0 0 256 256")
+                      path(d="M244.8,150.4a8,8,0,0,1-11.2-1.6A51.6,51.6,0,0,0,192,128a8,8,0,0,1-7.37-4.89,40,40,0,1,0-113.26,0A8,8,0,0,1,64,128a51.6,51.6,0,0,0-41.6,20.8,8,8,0,1,1-12.8-9.6A67.81,67.81,0,0,1,64,112a8,8,0,0,1,8-8,56,56,0,1,1,112,0,8,8,0,0,1,8,8,67.81,67.81,0,0,1,54.4,27.2A8,8,0,0,1,244.8,150.4Z")
+                  div
+                    h4(class="text-xl font-bold text-slate-800 dark:text-white") Total Victims Affected
+                    p.text-5xl.font-black.text-red-500.mt-1=totalVictims
+              .flex.flex-col.gap-8
+                div(class="bg-background-light dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 shadow-md")
+                  h4(class="text-xl font-bold text-slate-900 dark:text-white mb-4") Breakdown by Type
+                  .space-y-4
+                    if updatedBreakdown.length === 0
+                      p(class="text-slate-600 dark:text-slate-300") No crime data available.
+                    each crime in updatedBreakdown
+                      div
+                        div(class="flex justify-between mb-1 text-sm font-medium text-slate-600 dark:text-slate-300")
+                          span=crime._id
+                          span=crime.count
+                        div(class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5")
+                          div(class=`${crime.color} h-2.5 rounded-full`, style=`width: ${crime.percentage}%`)
+                div(class="bg-background-light dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 shadow-md")
+                  h4(class="text-xl font-bold text-slate-900 dark:text-white mb-4") Report Status Overview
+                  .space-y-4
+                    if updatedOverview.length === 0
+                      p(class="text-slate-600 dark:text-slate-300") No status data available.
+                    each status in updatedOverview
+                      div
+                        div(class="flex justify-between mb-1 text-sm font-medium text-slate-600 dark:text-slate-300")
+                          span=status._id
+                          span=status.count
+                        div(class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5")
+                          div(class=`${status.color} h-2.5 rounded-full`, style=`width: ${status.percentage}%`)
+
         section#features(class="py-16 md:py-24 bg-background-light dark:bg-background-dark")
           .container.mx-auto.px-6
             .text-center.mb-12
@@ -145,7 +125,7 @@ html(lang="en")
                   | Security Insights
                 p(class="text-slate-600 dark:text-slate-400")
                   | Gain valuable insights to improve community safety and security strategies.
-        
+
         section#contact(class="py-16 md:py-24 bg-white dark:bg-slate-900")
           .container.mx-auto.px-6
             .text-center.mb-12
