@@ -13,23 +13,24 @@ exports.signup = catchAsync(async (req, res, next) => {
   allowed.forEach((elem) => {
     if (req.body[elem]) gotten[elem] = req.body[elem];
   });
-  const existingUser = await User.findOne({ email: gotten.email });
+  const existingUser = await User.findOne({ email: gotten.email }).select(
+    "+active"
+  );
+
   if (existingUser) {
     if (existingUser.active) {
-      return next(
-        new AppError("This email is already registered. Please log in.", 409)
-      ); // 409 Conflict
+      return next(new AppError("Account already exist.", 409)); // 409 Conflict
+    }
+    if (gotten.password !== gotten.confirmPassword) {
+      return next(new AppError("Passwords do not match", 400));
     }
     const confirmToken = existingUser.confirmTokenGen();
     existingUser.name = gotten.name;
     existingUser.newPassword = gotten.password;
-    existingUser.confirmPassword = gotten.confirmPassword;
+    existingUser.confirmPassword = undefined;
 
-    await existingUser.save();
-
-    const url = `${req.protocol}://${req.get(
-      "host"
-    )}/activateAccount/${confirmToken}`;
+    await existingUser.save({ validateBeforeSave: false });
+    const url = `${req.protocol}://${req.get("host")}/login/${confirmToken}`;
     await new Email(existingUser, url).sendWelcome();
     return signTokenHandler(
       200,
@@ -42,10 +43,9 @@ exports.signup = catchAsync(async (req, res, next) => {
   const newUser = new User(gotten);
   const confirmToken = newUser.confirmTokenGen();
   await newUser.save();
+  console.log(newUser);
 
-  const url = `${req.protocol}://${req.get(
-    "host"
-  )}/activateAccount/${confirmToken}`;
+  const url = `${req.protocol}://${req.get("host")}/login/${confirmToken}`;
 
   await new Email(newUser, url).sendWelcome();
 

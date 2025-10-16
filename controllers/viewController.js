@@ -1,5 +1,8 @@
 const catchAsync = require("../utils/catchAsync");
 const Crime = require("../models/crimeModel");
+const crypto = require("crypto");
+const User = require("../models/userModel");
+const AppError = require("../utils/appError");
 
 exports.home = catchAsync(async (req, res, next) => {
   const queryFilter = { crimeAuth: "verified" };
@@ -60,13 +63,7 @@ exports.home = catchAsync(async (req, res, next) => {
     percentage: ((c.count / totalCrimes) * 100).toFixed(2),
     color: statusColorMap[c._id] || "bg-slate-400",
   }));
-  console.log(
-    totalCrimes,
-    victimsData,
-    totalVictims,
-    updatedBreakdown,
-    statusOverview
-  );
+
   const data = {
     totalCrimes,
     totalVictims,
@@ -80,5 +77,30 @@ exports.mapView = catchAsync(async (req, res, next) => {
   res.status(200).render("map", { crimes: crimedata });
 });
 exports.login = catchAsync(async (req, res, next) => {
-  res.status(200).render("login");
+  const token = req.params.token;
+  if (token) {
+    const hashToken = crypto
+      .createHash("sha256")
+      .update(String(token))
+      .digest("hex");
+    const user = await User.findOne({
+      confirmToken: hashToken,
+      confirmTokenExpires: { $gt: Date.now() },
+    });
+    if (!user) {
+      return next(new AppError("Token is invalid or expired", 400));
+    }
+    user.confirmToken = undefined;
+    user.confirmTokenExpires = undefined;
+    user.active = true;
+    await user.save({ validateBeforeSave: false });
+  }
+  res
+    .status(200)
+    .render("login", { title: "Crime Repo - Sign In", page: "login" });
+});
+exports.signup = catchAsync(async (req, res, next) => {
+  res
+    .status(200)
+    .render("signup", { title: "Crime Repo - Sign Up", page: "signup" });
 });

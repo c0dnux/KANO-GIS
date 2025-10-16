@@ -6,5 +6,6 @@ const authController = require("../controllers/authController");
 router.post("/activateAccount/:token", authController.activateAccount);
 router.get("/HOME", authController.isLoggedIn, viewController.home);
 router.get("/map", viewController.mapView);
-router.get("/login", viewController.login);
+router.get("/login/:token", viewController.login);
+router.get("/signup", viewController.signup);
 module.exports = router;

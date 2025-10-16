@@ -1,17 +1,42 @@
-extends baseEmail
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title Welcome Aboard!
+    body(style="margin:0;padding:0;background-color:#111827;font-family:'Inter',sans-serif;")
+        div(style='max-width:600px;margin:0 auto;background-color:#1f2937;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.2);overflow:hidden;color:#d1d5db;')
 
-block content
-    p Hi #{firstName},
-    p Welcome to Natours, we're glad to have you 🎉🙏
-    p We're all a big familiy here, so make sure to upload your user photo so we get to know you a bit better!
-    table.btn.btn-primary(role='presentation', border='0', cellpadding='0', cellspacing='0')
-        tbody
-            tr
-                td(align='left')
-                    table(role='presentation', border='0', cellpadding='0', cellspacing='0')
-                        tbody
-                            tr
-                                td
-                                    a(href=`${url}`, target='_blank') Upload user photo
-    p If you need any help with booking your next tour, please don't hesitate to contact me!
-    p - Abdulrahman Mustapha, CEO
+            // Header Section
+            div(style='background-color:#4338ca;padding:24px;text-align:center;color:#ffffff;')
+                h1(style='margin:0;font-size:24px;font-weight:700;') Welcome to Crime Repo!
+
+            // Main Content Section
+            div(style='padding:24px 32px;')
+                p(style='font-size:18px;margin:0 0 16px 0;')
+                    | Hi 
+                    strong(style='font-weight:600;color:#ffffff;') #{firstName}
+                    | ,
+                p(style='font-size:16px;line-height:1.6;margin:0 0 16px 0;') We're excited to have you join our platform. 🎉
+                p(style='font-size:16px;line-height:1.6;margin:0 0 24px 0;')
+                    | To get started, please take a moment to activate your account.
+
+                // CTA Button (use inline style table for email compatibility)
+                table(role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style='margin-bottom:24px;')
+                    tr
+                        td(align="center")
+                            table(role="presentation" border="0" cellpadding="0" cellspacing="0")
+                                tr
+                                    td(style='background-color:#4338ca;border-radius:8px;text-align:center;')
+                                        a(href=`${url}` target="_blank" style='display:inline-block;text-decoration:none;color:#ffffff;padding:12px 24px;font-size:16px;font-weight:700;border-radius:8px;') Activate Your Account
+
+                p(style='font-size:16px;line-height:1.6;margin:0 0 16px 0;')
+                    | If you need any help, please don't hesitate to reach out!
+                p(style='font-size:16px;line-height:1.6;margin:0;') - The Team
+
+            // Footer Section
+            div(style='background-color:#374151;border-top:1px solid #4b5563;text-align:center;padding:24px;')
+                p(style='margin:0;color:#9ca3af;font-size:14px;line-height:1.6;')
+                    | © 2025 Crime Repo. All Rights Reserved.
+                    br
+                    | No 225 sharada phase 1 kano, Nigeria.

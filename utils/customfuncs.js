@@ -18,7 +18,6 @@ exports.signTokenHandler = (statusCode, message, res, user) => {
     secure: process.env.NODE_ENV === "production",
     sameSite: "Strict",
   };
-  console.log(cookieOptions, token);
 
   res.cookie("jwt", token, cookieOptions);
   res.setHeader("Access-Control-Allow-Credentials", true);

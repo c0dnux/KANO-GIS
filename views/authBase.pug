@@ -1,0 +1,28 @@
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title=title
+        link(rel="preconnect" href="https://fonts.googleapis.com")
+        link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined")
+        script(src="https://cdn.tailwindcss.com?plugins=forms,container-queries")
+        script(src="/js/tailwindjs.js")
+        if page && page==="login"
+            script(src="/js/togglelogin.js")
+        else 
+            script(src="/js/password-toggle.js")
+    body(class="bg-background-light dark:bg-background-dark font-display")
+        div(class="flex flex-col min-h-screen")
+            header(class="w-full")
+                div(class="container mx-auto px-4 sm:px-6 lg:px-8")
+                    div(class="flex items-center justify-between py-6")
+                        a(class="flex items-center gap-2" href="/HOME")
+                            svg(class="h-8 w-8 text-primary" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg")
+                                path(clip-rule="evenodd" fill-rule="evenodd" d="M12 2C15.866 2 19 5.13401 19 9C19 12.866 12 22 12 22C12 22 5 12.866 5 9C5 5.13401 8.13401 2 12 2ZM12 11.5C13.3807 11.5 14.5 10.3807 14.5 9C14.5 7.61929 13.3807 6.5 12 6.5C10.6193 6.5 9.5 7.61929 9.5 9C9.5 10.3807 10.6193 11.5 12 11.5Z")
+                            span(class="text-xl font-bold text-slate-800 dark:text-slate-200") Crime Repo
+            main(class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8")
+                block content
+        script(type="module" src="/js/index.js")
+        script(src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js" integrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA==" crossorigin="anonymous" referrerpolicy="no-referrer")

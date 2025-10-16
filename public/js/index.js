@@ -1,7 +1,8 @@
 import { initializeCrimeMap } from "./map.js";
 const loginForm = document.getElementById("login-form");
 const logoutBtn = document.getElementById("logout-btn");
-import { login, logout } from "./auth.js";
+const userSignup = document.getElementById("signup-form");
+import { auth, logout } from "./auth.js";
 // --- MAP LOGIC ---
 // 1. Find the map element in the document
 const mapElement = document.getElementById("map");
@@ -28,14 +29,27 @@ if (loginForm) {
     e.preventDefault();
     const email = document.getElementById("username").value;
     const password = document.getElementById("password").value;
-    console.log(email,password);
-    
-    await login(email, password);
+    console.log(email, password);
+    const data = { email, password };
+    await auth("login", data);
   });
 }
 if (logoutBtn) {
   logoutBtn.addEventListener("click", async (e) => {
     e.preventDefault();
     await logout();
+  });
+}
+if (userSignup) {
+  userSignup.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = {
+      name: document.getElementById("name").value,
+      email: document.getElementById("email").value,
+      password: document.getElementById("password").value,
+      confirmPassword: document.getElementById("confirmPassword").value,
+    };
+
+    await auth("signup", form);
   });
 }

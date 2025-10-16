@@ -27,9 +27,6 @@ app.use(cors({
 //Set security HTTP headers
 app.use(helmet());
 
-
-app.use(helmet());
-
 app.use(
   helmet.contentSecurityPolicy({
     useDefaults: true,

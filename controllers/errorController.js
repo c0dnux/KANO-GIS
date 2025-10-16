@@ -1,4 +1,3 @@
-require("dotenv").config();
 const AppError = require("./../utils/appError");
 
 const handleCastErrDB = (err) => {
@@ -22,40 +21,54 @@ const handleAuthErr = () => {
 const handleAuthEXpireErr = () => {
   return new AppError("Login Timeout,please login again.", 401);
 };
-const sendErrDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
-    message: err.message,
-    stack: err.stack,
-  });
-};
-const sendErrProduc = (err, res) => {
-  // Operational, trusted error: send message to client
-  if (err.isOperational) {
+const sendErrDev = (err, req, res) => {
+  if (req.originalUrl.startsWith("/api")) {
     res.status(err.statusCode).json({
       status: err.status,
+      error: err,
       message: err.message,
+      stack: err.stack,
     });
-
-    // Programming or other unknown error: don't leak error details
   } else {
-    // 1) Log error
-    console.error("ERROR 💥", err);
+    res.status(err.statusCode).render("error", {
+      title: "Something went wrong!",
+      msg: err.message,
+    });
+  }
+};
+const sendErrProduc = (err, req, res) => {
+  if (req.originalUrl.startsWith("/api")) {
+    if (err.isOperational) {
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+    }
 
-    // 2) Send generic message
-    res.status(500).json({
-      status: "error",
+    console.error("Error", err);
+    return res.status(500).json({
+      status: "Error",
       message: "Something went very wrong!",
     });
   }
+  if (err.isOperational) {
+    return res.status(err.statusCode).render("error", {
+      title: "Something went wrong!",
+      msg: err.message,
+    });
+  }
+  console.error("Error", err);
+  return res.status(err.statusCode).render("error", {
+    title: "Something went wrong!",
+    msg: "Please try again later",
+  });
 };
 
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "Error";
   if (process.env.NODE_ENV === "development") {
-    sendErrDev(err, res);
+    sendErrDev(err, req, res);
   } else if (process.env.NODE_ENV === "production") {
     // let error = {
     //   ...err,
@@ -77,6 +90,6 @@ module.exports = (err, req, res, next) => {
     if (error.name === "ValidationError") error = handleValErrDB(error);
     if (error.name === "JsonWebTokenError") error = handleAuthErr();
     if (error.name === "TokenExpiredError") error = handleAuthEXpireErr();
-    sendErrProduc(error, res);
+    sendErrProduc(error, req, res);
   }
 };
