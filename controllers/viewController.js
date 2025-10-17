@@ -78,6 +78,7 @@ exports.mapView = catchAsync(async (req, res, next) => {
 });
 exports.login = catchAsync(async (req, res, next) => {
   const token = req.params.token;
+
   if (token) {
     const hashToken = crypto
       .createHash("sha256")
@@ -103,4 +104,19 @@ exports.signup = catchAsync(async (req, res, next) => {
   res
     .status(200)
     .render("signup", { title: "Crime Repo - Sign Up", page: "signup" });
+});
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  const token = req.params.token;
+  res
+    .status(200)
+    .render("reset-password", {
+      title: "Crime Repo - Reset password",
+      token,
+      page: "login",
+    });
+});
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  res
+    .status(200)
+    .render("forgot-password", { title: "Crime Repo - Forgot password" });
 });

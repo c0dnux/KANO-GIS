@@ -191,6 +191,8 @@ exports.restrictTo = (...roles) => {
 };
 
 exports.forgetPassword = catchAsync(async (req, res, next) => {
+  console.log(req.body);
+
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
@@ -198,14 +200,16 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
   }
   const resetToken = user.confirmTokenGen();
 
-  await user.save();
+  await user.save({ validateBeforeSave: false });
   const resetURL = `${req.protocol}://${req.get(
     "host"
-  )}/api/v1/users/resetPassword/${resetToken}`;
+  )}/reset-password/${resetToken}`;
   try {
     await new Email(user, resetURL).sendPasswordReset();
     res.status(200).json({ status: "Success", message: "Token sent to email" });
   } catch (error) {
+    console.log(error);
+
     user.confirmToken = undefined;
     user.confirmTokenExpires = undefined;
     await user.save({ validateBeforeSave: false });
@@ -214,8 +218,12 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
   }
 });
 exports.resetPassword = catchAsync(async (req, res, next) => {
-  const resetToken = req.params.token;
+  console.log(req.body);
 
+  const resetToken = req.body.token || req.params.token;
+  if (req.body.password !== req.body.confirmPassword) {
+    return next(new AppError("Passwords do not match", 400));
+  }
   const hashToken = crypto
     .createHash("sha256")
     .update(String(resetToken))
@@ -238,27 +246,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   // res
   //   .status(200)
   //   .json({ status: "Success", message: "Updated your password", token });
-  signTokenHandler(200, "Check Email", res, user);
+  signTokenHandler(200, "Reset Successful", res, user);
 });
-// exports.updatePassword = catchAsync(async (req, res, next) => {
-//   const user = await User.findById(req.user.id).select("+password");
-//   if (
-//     !(await user.isCorrectPassword(req.body.passwordCurrent, user.password))
-//   ) {
-//     return next(new AppErr("Your current password is wrong", 401));
-//   }
-
-//   user.password = req.body.password;
-
-//   await user.save();
-
-//   const token = signToken(user._id);
-
-//   res
-//     .status(200)
-//     .json({ status: "Success", message: "Password updated", token });
-//   signTokenHandler(200, "Password updated", res, user);
-// });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select("+password");

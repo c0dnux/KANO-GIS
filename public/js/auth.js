@@ -1,7 +1,12 @@
 import { showAlert } from "./alert.js";
 
 export const auth = async (type, data) => {
-  const url = type === "login" ? "/api/v1/users/login" : "/api/v1/users/signup";
+  const url =
+    type === "login"
+      ? "/api/v1/users/login"
+      : type === "signup"
+      ? "/api/v1/users/signup"
+      : "/api/v1/users/resetPassword";
 
   try {
     const res = await axios.post(url, data, {
@@ -11,7 +16,8 @@ export const auth = async (type, data) => {
       console.log();
       showAlert("success", res.data.message);
       window.setTimeout(() => {
-        if (type === "login") location.assign("/map");
+        if (type === "login" || type === "resetPassword")
+          location.assign("/map");
       }, 1500);
     }
   } catch (err) {
@@ -29,5 +35,15 @@ export const logout = async () => {
     if (res.data.status === "Success") location.reload(true);
   } catch (err) {
     showAlert("error", "Error logging out! Try again.");
+  }
+};
+export const forgetPassword = async (email) => {
+  try {
+    const res = await axios.post("/api/v1/users/forgetPassword", { email });
+    if (res.data.status === "Success") {
+      showAlert("success",res.data.message);
+    }
+  } catch (err) {
+    showAlert("error", err.response.data.message);
   }
 };

@@ -2,7 +2,10 @@ import { initializeCrimeMap } from "./map.js";
 const loginForm = document.getElementById("login-form");
 const logoutBtn = document.getElementById("logout-btn");
 const userSignup = document.getElementById("signup-form");
-import { auth, logout } from "./auth.js";
+const resetPasswordForm = document.getElementById("reset-password-form");
+const forgotPassword = document.getElementById("forgot-password");
+const forgetPasswordfunc = document.getElementById("forgot-password-func");
+import { auth, logout, forgetPassword } from "./auth.js";
 // --- MAP LOGIC ---
 // 1. Find the map element in the document
 const mapElement = document.getElementById("map");
@@ -51,5 +54,31 @@ if (userSignup) {
     };
 
     await auth("signup", form);
+  });
+}
+if (resetPasswordForm) {
+  resetPasswordForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const token = document.getElementById("token").value;
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const data = { password, confirmPassword, token };
+
+    await auth("resetPassword", data);
+  });
+}
+
+if (forgotPassword) {
+  forgotPassword.addEventListener("click", async (e) => {
+    e.preventDefault();
+    window.location.href = "/forgot-password";
+  });
+}
+if (forgetPasswordfunc) {
+  forgetPasswordfunc.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("email").value;
+    await forgetPassword(email);
   });
 }
