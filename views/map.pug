@@ -4,7 +4,7 @@ html(lang="en")
         meta(charset="utf-8")
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
         title Crime Repo - Crime Map
-        
+
         //- Google Fonts
         link(rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="")
         link(rel="stylesheet" href="https://fonts.googleapis.com/css2?display=swap&family=Public+Sans:wght@400;500;700;900")
@@ -20,7 +20,7 @@ html(lang="en")
         link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" integrity="sha512-Zcn6bjR/8RZbLEpLIeOwNtzREBAJnUKESxces60Mpoj+2okopSAcSUIUOseddDm0cxnGQzxIR7vJgsLZbdLE3w==" crossorigin="anonymous" referrerpolicy="no-referrer")
         link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" integrity="sha512-mQ77VzAakzdpWdgfL/lM1ksNy89uFgibRQANsNneSTMD/bj0Y/8+94XMwYhnbzx8eki2hrbPpDm0vD0CiT2lcg==" crossorigin="anonymous" referrerpolicy="no-referrer")
         link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" integrity="sha512-6ZCLMiYwTeli2rVh3XAPxy3YoR5fVxGdH/pz+KMCzRY2M65Emgkw00Yqmhh8qLGeYQ3LbVZGdmOX9KUjSKr0TA==" crossorigin="anonymous" referrerpolicy="no-referrer")
-        
+
         style.
             /* Your inline styles remain the same */
             .leaflet-control-container .leaflet-control {
@@ -56,20 +56,22 @@ html(lang="en")
                     .flex.items-center.gap-3.text-primary
                         span(class="material-symbols-outlined text-3xl") local_police
                         a(class="text-xl font-bold text-gray-900 dark:text-white" href="/HOME") Crime Repo
-                    nav#main-nav(class="hidden flex flex-col absolute top-full right-4 mt-2 w-48 bg-white dark:bg-slate-800 p-4 rounded-lg shadow-lg border border-primary/20 dark:border-primary/30 space-y-2 z-50 md:flex md:relative md:flex-row md:top-auto md:right-auto md:mt-0 md:w-auto md:bg-transparent md:p-0 md:shadow-none md:border-none md:space-y-0 md:gap-6")
-                        a(class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors" href="#") Dashboard
-                        a(class="text-sm font-medium text-primary dark:text-primary" href="#") Map
-                        a(class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors" href="#") Reports
-                        a(class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors" href="#") Analytics
+                    if user
+                        nav#main-nav(class="hidden flex flex-col absolute top-full right-4 mt-2 w-48 bg-white dark:bg-slate-800 p-4 rounded-lg shadow-lg border border-primary/20 dark:border-primary/30 space-y-2 z-50 md:flex md:relative md:flex-row md:top-auto md:right-auto md:mt-0 md:w-auto md:bg-transparent md:p-0 md:shadow-none md:border-none md:space-y-0 md:gap-6")
+                            a(href="#" class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors text-gray-600 dark:text-gray-300" aria-label="Report Crime")
+                                span(class="material-symbols-outlined") dashboard
+                                span(class="text-sm font-medium") Dashboard
+                            a(href="/report-crime" class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors text-gray-600 dark:text-gray-300" aria-label="Report Crime")
+                                span(class="material-symbols-outlined") report
+                                span(class="text-sm font-medium") Report Crime   
                 .flex.items-center.gap-4
-                    div(class="hidden sm:flex items-center gap-2")
-                        button(class="p-2 rounded-full hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors" aria-label="View notifications")
-                            span(class="material-symbols-outlined text-gray-600 dark:text-gray-400") notifications
-                        button(class="p-2 rounded-full hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors" aria-label="Open settings")
-                            span(class="material-symbols-outlined text-gray-600 dark:text-gray-400") settings
-                    div(class="w-10 h-10 rounded-full bg-cover bg-center" style="background-image: url('https://randomuser.me/api/portraits/men/32.jpg')")
-                    button#menu-toggle(class="p-2 rounded-full md:hidden hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors")
-                        span(class="material-symbols-outlined text-gray-600 dark:text-gray-400") menu
+                    if user
+                        a(href="#")
+                            img(src=`/policeman.png`, alt=user.name, class="w-10 h-10 rounded-full object-cover")
+                        button#menu-toggle(class="p-2 rounded-full md:hidden hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors")
+                            span(class="material-symbols-outlined text-gray-600 dark:text-gray-400") menu
+                    else 
+                        a(href="/login" class="text-sm font-medium text-white bg-primary hover:bg-primary/90 px-4 py-2 rounded-lg transition-colors") Report Crime 
 
             main(class="flex-1 grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 sm:p-6 lg:p-8")
                 //- Your filters panel...
@@ -94,14 +96,50 @@ html(lang="en")
                             label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" for="location") Location
                             select#location(class="w-full rounded border-primary/30 bg-background-light dark:bg-background-dark/50 focus:ring-primary focus:border-primary text-gray-900 dark:text-gray-200")
                                 option(value="All") All Local Governments
-                                option Fagge
-                                option Dala
-                                option Gwale
-                                option Kano Municipal
-                                option Tarauni
-                                option Nassarawa
-                                option Kumbotso
-                                option Ungogo
+                                option(value="Ajingi") Ajingi
+                                option(value="Albasu") Albasu
+                                option(value="Bagwai") Bagwai
+                                option(value="Bebeji") Bebeji
+                                option(value="Bichi") Bichi
+                                option(value="Bunkure") Bunkure
+                                option(value="Dala") Dala
+                                option(value="Dambatta") Dambatta
+                                option(value="Dawakin Kudu") Dawakin Kudu
+                                option(value="Dawakin Tofa") Dawakin Tofa
+                                option(value="Doguwa") Doguwa
+                                option(value="Fagge") Fagge
+                                option(value="Gabasawa") Gabasawa
+                                option(value="Garko") Garko
+                                option(value="Garun Mallam") Garun Mallam
+                                option(value="Gaya") Gaya
+                                option(value="Gezawa") Gezawa
+                                option(value="Gwale") Gwale
+                                option(value="Gwarzo") Gwarzo
+                                option(value="Kabo") Kabo
+                                option(value="Kano Municipal") Kano Municipal
+                                option(value="Karaye") Karaye
+                                option(value="Kibiya") Kibiya
+                                option(value="Kiru") Kiru
+                                option(value="Kumbotso") Kumbotso
+                                option(value="Kunchi") Kunchi
+                                option(value="Kura") Kura
+                                option(value="Madobi") Madobi
+                                option(value="Makoda") Makoda
+                                option(value="Minjibir") Minjibir
+                                option(value="Nasarawa") Nasarawa
+                                option(value="Rano") Rano
+                                option(value="Rimin Gado") Rimin Gado
+                                option(value="Rogo") Rogo
+                                option(value="Shanono") Shanono
+                                option(value="Sumaila") Sumaila
+                                option(value="Takai") Takai
+                                option(value="Tarauni") Tarauni
+                                option(value="Tofa") Tofa
+                                option(value="Tsanyawa") Tsanyawa
+                                option(value="Tudun Wada") Tudun Wada
+                                option(value="Ungogo") Ungogo
+                                option(value="Warawa") Warawa
+                                option(value="Wudil") Wudil
                     div(class="p-4 border-t border-primary/20 dark:border-primary/30 space-y-4")
                         button#apply-filters-btn(class="w-full bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors") Apply Filters
                         button#remove-filters-btn(class="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors") Remove Filter
@@ -125,6 +163,6 @@ html(lang="en")
     //- JavaScript libraries at the end of the body with CORRECTED integrity hashes
     script(src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg==" crossorigin="anonymous" referrerpolicy="no-referrer")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js" integrity="sha512-OFs3W4DIZ5ZkrDhBFtsCP6JXtMEDGmhl0QPlmWYBJay40TT1n3gt2Xuw8Pf/iezgW9CdabjkNChRqozl/YADmg==" crossorigin="anonymous" referrerpolicy="no-referrer")
-    
+
     //- Your custom scripts, which depend on the libraries above
     script(type="module" src="/js/index.js")

@@ -5,7 +5,7 @@ const axios = require("axios");
 const AppError = require("../utils/appError");
 const { set } = require("mongoose");
 exports.reportCrime = catchAsync(async (req, res, next) => {
-  console.log(req.body);
+  console.log("BAckend", req.body);
   const address = `${req.body.location.address} ${req.body.location.city} ${req.body.location.localGovernment}, ${req.body.location.state}, Nigeria`;
 
   const response = await axios.get(
@@ -29,17 +29,46 @@ exports.reportCrime = catchAsync(async (req, res, next) => {
   };
 
   req.body.reportedBy = req.user.id;
+  /*---------------CHECKING FOR DUPLICATE --------------------*/
+  const incidentDate = new Date(req.body.date);
+  const windowMinutes = 120;
+  const minDate = new Date(incidentDate.getTime() - windowMinutes * 60 * 1000);
+  const maxDate = new Date(incidentDate.getTime() + windowMinutes * 60 * 1000);
+
+  // radius in meters, converted to radians for $centerSphere (meters / earthRadiusMeters)
+  const radiusMeters = 100; // 100m
+  const earthRadius = 6378137; // meters
+  const radiusInRadians = radiusMeters / earthRadius;
+  const maybeDuplicate = await Crime.findOne({
+    crimeType: req.body.crimeType,
+    date: { $gte: minDate, $lte: maxDate },
+    "location.coordinates": {
+      $geoWithin: {
+        $centerSphere: [
+          req.body.location.coordinates.coordinates,
+          radiusInRadians,
+        ],
+      },
+    },
+  }).lean();
+
+  if (maybeDuplicate) {
+    return next(new AppError("Crime already reported.", 409));
+  }
+  /*---------------END OF DUPLICATE CHECK --------------------*/
+
   const newCrime = await Crime.create(req.body);
 
   res.status(201).json({
-    status: "success",
+    status: "Success",
+    message: "Crime reported successfully",
     data: newCrime,
   });
 });
 exports.getAllCrimes = catchAsync(async (req, res, next) => {
   const crimes = await Crime.find().populate("reportedBy", "name email");
   res.status(200).json({
-    status: "success",
+    status: "Success",
     results: crimes.length,
     data: crimes,
   });

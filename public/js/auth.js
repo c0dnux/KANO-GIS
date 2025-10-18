@@ -29,7 +29,7 @@ export const auth = async (type, data) => {
 
 export const logout = async () => {
   try {
-    const res = await axios.get("/api/v1/users/logout", {
+    const res = await axios.post("/api/v1/users/logout", {
       withCredentials: true,
     });
     if (res.data.status === "Success") location.reload(true);
@@ -41,9 +41,26 @@ export const forgetPassword = async (email) => {
   try {
     const res = await axios.post("/api/v1/users/forgetPassword", { email });
     if (res.data.status === "Success") {
-      showAlert("success",res.data.message);
+      showAlert("success", res.data.message);
     }
   } catch (err) {
+    showAlert("error", err.response.data.message);
+  }
+};
+//////--------REPORT CRIME FORM LOGIC ---------//////
+export const reportCrime = async (formData) => {
+  console.log(formData);
+
+  try {
+    const res = await axios.post("/api/v1/crimes/report", formData, {
+      withCredentials: true,
+    });
+    if (res.data.status === "Success") {
+      showAlert("success", res.data.message);
+    }
+  } catch (err) {
+    console.log(err);
+
     showAlert("error", err.response.data.message);
   }
 };

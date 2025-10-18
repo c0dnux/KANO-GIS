@@ -5,7 +5,8 @@ const userSignup = document.getElementById("signup-form");
 const resetPasswordForm = document.getElementById("reset-password-form");
 const forgotPassword = document.getElementById("forgot-password");
 const forgetPasswordfunc = document.getElementById("forgot-password-func");
-import { auth, logout, forgetPassword } from "./auth.js";
+const reportCrimeForm = document.getElementById("report-crime");
+import { auth, logout, forgetPassword, reportCrime } from "./auth.js";
 // --- MAP LOGIC ---
 // 1. Find the map element in the document
 const mapElement = document.getElementById("map");
@@ -80,5 +81,34 @@ if (forgetPasswordfunc) {
     e.preventDefault();
     const email = document.getElementById("email").value;
     await forgetPassword(email);
+  });
+}
+
+//////--------REPORT CRIME FORM LOGIC ---------//////
+if (reportCrimeForm) {
+  reportCrimeForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const crimeType = document.getElementById("crime-type").value;
+    const description = document.getElementById("description").value;
+    const date = document.getElementById("date").value;
+    const address = document.getElementById("address").value;
+    const city = document.getElementById("city").value;
+    const localGovernment = document.getElementById("local-government").value;
+    const state = document.getElementById("state").value;
+    const victims = document.getElementById("victims").value;
+    const data = {
+      crimeType,
+      description,
+      date,
+      victims,
+      location: {
+        address,
+        city,
+        localGovernment,
+        state,
+      },
+    };
+
+    await reportCrime(data);
   });
 }

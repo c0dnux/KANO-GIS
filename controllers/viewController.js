@@ -107,16 +107,19 @@ exports.signup = catchAsync(async (req, res, next) => {
 });
 exports.resetPassword = catchAsync(async (req, res, next) => {
   const token = req.params.token;
-  res
-    .status(200)
-    .render("reset-password", {
-      title: "Crime Repo - Reset password",
-      token,
-      page: "login",
-    });
+  res.status(200).render("reset-password", {
+    title: "Crime Repo - Reset password",
+    token,
+    page: "login",
+  });
 });
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   res
     .status(200)
     .render("forgot-password", { title: "Crime Repo - Forgot password" });
+});
+exports.reportCrime = catchAsync(async (req, res, next) => {
+  res
+    .status(200)
+    .render("report-crime", { title: "Crime Repo - Report a crime" });
 });

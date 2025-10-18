@@ -11,9 +11,9 @@ tailwind.config = {
         display: ["Public Sans"],
       },
       borderRadius: {
-        DEFAULT: "0.25rem",
-        lg: "0.5rem",
-        xl: "0.75rem",
+        DEFAULT: "0.5rem",
+        lg: "0.75rem",
+        xl: "1rem",
         full: "9999px",
       },
     },
