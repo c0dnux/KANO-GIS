@@ -5,7 +5,7 @@ const User = require("../models/userModel");
 const AppError = require("../utils/appError");
 
 exports.home = catchAsync(async (req, res, next) => {
-  const queryFilter = { crimeAuth: "verified" };
+  const queryFilter = { crimeAuth: "Verified" };
   // Counts every crime report document.
   const totalCrimes = await Crime.countDocuments(queryFilter);
   const victimsData = await Crime.aggregate([
@@ -73,7 +73,7 @@ exports.home = catchAsync(async (req, res, next) => {
   res.status(200).render("index", data);
 });
 exports.mapView = catchAsync(async (req, res, next) => {
-  const crimedata = await Crime.find({ crimeAuth: "verified" });
+  const crimedata = await Crime.find({ crimeAuth: "Verified" });
   res.status(200).render("map", { crimes: crimedata });
 });
 exports.login = catchAsync(async (req, res, next) => {
@@ -121,5 +121,25 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 exports.reportCrime = catchAsync(async (req, res, next) => {
   res
     .status(200)
-    .render("report-crime", { title: "Crime Repo - Report a crime" });
+    .render("report-crime", {
+      title: "Crime Repo - Report a crime",
+      page: "report",
+    });
+});
+exports.allCrimes = catchAsync(async (req, res, next) => {
+  const crimedata = await Crime.find();
+  const formatted = crimedata.map((c) => ({
+    id: c.reportId,
+    description: c.description,
+    status: c.status, // e.g. "Under Investigation", "Resolved"
+    auth: c.crimeAuth, // from schema
+    date: c.date ? c.date.toISOString().split("T")[0] : "",
+    type: c.crimeType,
+    location: `${c.location.address}, ${c.location.city}`,
+  }));
+  res.status(200).render("all-crimes", {
+    page: "all-crimes",
+    crimes: formatted,
+    title: "Crime Repo - All Crimes",
+  });
 });

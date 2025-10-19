@@ -1,0 +1,242 @@
+extends dashBase
+
+block content
+  main(class="flex-1")
+    // Header (mobile only)
+    header(class="sticky top-0 z-30 bg-white/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 p-4 lg:hidden")
+      div(class="flex items-center")
+        button(id="menu-button" class="p-2 rounded-md text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700")
+          span(class="material-symbols-outlined") menu
+
+    // Main content wrapper
+    div(class="p-4 sm:p-6 lg:p-8")
+      div(class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4")
+        h2(class="text-3xl font-bold text-gray-900 dark:text-white") Crime Reports
+        div(class="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center")
+          select(id="filter-auth" class="form-select w-full sm:w-auto border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-background-dark text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-primary transition")
+            option(value="") Filter by Auth
+            option(value="Verified") Verified
+            option(value="Pending") Pending
+            option(value="Fake") Fake
+          select(id="filter-status" class="form-select w-full sm:w-auto border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-background-dark text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-primary transition")
+            option(value="") Filter by Status
+            option(value="Unknown") Unknown
+            option(value="Under Investigation") Under Investigation
+            option(value="Resolved") Resolved
+          button(id="clear-filters" class="text-sm w-full sm:w-auto px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-background-dark text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition") Clear Filters
+          button(class="flex items-center w-full sm:w-auto justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 transition-colors")
+            span(class="material-symbols-outlined") add
+            span New Report
+
+      // Reports table container
+      div(class="bg-white dark:bg-background-dark shadow-sm rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700")
+        div(class="overflow-x-auto")
+          table(class="w-full text-left min-w-[600px]")
+            thead(class="bg-background-light dark:bg-gray-800/50")
+              tr
+                th(class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider") Description
+                th(class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider") Status
+                th(class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider") Auth
+                th(class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider") Date
+                th(class="px-6 py-4")
+            tbody(id="report-table" class="divide-y divide-gray-200 dark:divide-gray-700")
+              // dynamic rows injected by JS
+
+      // Pagination and Summary Controls
+      div(class="flex flex-col sm:flex-row items-center justify-between pt-6 gap-4")
+        p(id="pagination-summary" class="text-sm text-gray-600 dark:text-gray-400")
+        nav(id="pagination" class="isolate inline-flex -space-x-px rounded-md shadow-sm", aria-label="Pagination")
+
+  // Inline CSS for badge colors
+  style.
+    .status-badge {
+      display: inline-block;
+      font-weight: 600;
+      font-size: 0.75rem;
+      padding: 0.35rem 0.6rem;
+      border-radius: 9999px;
+      transition: all 0.25s ease;
+    }
+    .status-badge:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Status colors */
+    .status-open {
+      color: #065f46;
+      background-color: #d1fae5;
+      border: 1px solid #10b98133;
+    }
+    .status-in-progress {
+      color: #92400e;
+      background-color: #fef3c7;
+      border: 1px solid #f59e0b33;
+    }
+    .status-closed {
+      color: #991b1b;
+      background-color: #fee2e2;
+      border: 1px solid #ef444433;
+    }
+
+    /* Auth colors */
+    .status-verified {
+      color: #1e40af;
+      background-color: #dbeafe;
+      border: 1px solid #3b82f633;
+    }
+    .status-pending {
+      color: #6b21a8;
+      background-color: #ede9fe;
+      border: 1px solid #8b5cf633;
+    }
+    .status-fake {
+      color: #831843;
+      background-color: #fce7f3;
+      border: 1px solid #db277733;
+    }
+
+  // Sidebar and Table control scripts
+  script.
+    const originalReports = !{JSON.stringify(crimes)};
+
+    // --- STATE MANAGEMENT ---
+    
+    let filteredReports = [...originalReports];
+    const rowsPerPage = 20;
+    let currentPage = 1;
+
+    // --- ELEMENTS ---
+    const reportTableBody = document.getElementById("report-table");
+    const paginationContainer = document.getElementById("pagination");
+    const paginationSummary = document.getElementById("pagination-summary");
+    const filterAuth = document.getElementById("filter-auth");
+    const filterStatus = document.getElementById("filter-status");
+    const clearFiltersButton = document.getElementById("clear-filters");
+
+    // --- HELPERS ---
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, match => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      }[match]));
+    }
+
+    function getStatusBadgeClass(status) {
+      const s = status.toLowerCase();
+      if (s === "resolved") return "status-badge status-open";
+      if (s === "unknown") return "status-badge status-closed";
+      if (s === "under investigation") return "status-badge status-in-progress";
+      return "status-badge";
+    }
+
+    function getAuthBadgeClass(auth) {
+      const a = auth.toLowerCase();
+      if (a === "verified") return "status-badge status-verified";
+      if (a === "pending") return "status-badge status-pending";
+      if (a === "fake") return "status-badge status-fake";
+      return "status-badge";
+    }
+
+    // --- RENDERING ---
+    function render() {
+      renderTable();
+      renderPagination();
+      updateSummary();
+    }
+
+    function renderTable() {
+      reportTableBody.innerHTML = "";
+      const start = (currentPage - 1) * rowsPerPage;
+      const paginatedItems = filteredReports.slice(start, start + rowsPerPage);
+
+      if (paginatedItems.length === 0) {
+        reportTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-500 dark:text-gray-400">No reports found.</td></tr>`;
+        return;
+      }
+
+      paginatedItems.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-background-light/50 dark:hover:bg-gray-800/50 transition-colors";
+        tr.innerHTML = `
+            <td class="px-6 py-4 max-w-[250px] truncate text-gray-800 dark:text-gray-200 font-medium" title="${escapeHtml(r.description)}">
+            ${escapeHtml(r.description.length > 80 ? r.description.substring(0, 80) + '...' : r.description)}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap"><span class="${getStatusBadgeClass(r.status)}">${escapeHtml(r.status)}</span></td>
+            <td class="px-6 py-4 whitespace-nowrap"><span class="${getAuthBadgeClass(r.auth)}">${escapeHtml(r.auth)}</span></td>
+            <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">${escapeHtml(r.date)}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-right">
+            <a href="/crime/${r.id}" class="text-primary hover:underline font-medium">View</a>
+            </td>
+        `;
+        reportTableBody.appendChild(tr);
+      });
+
+    }
+
+    function renderPagination() {
+      paginationContainer.innerHTML = "";
+      const totalPages = Math.max(1, Math.ceil(filteredReports.length / rowsPerPage));
+      if (totalPages <= 1) return;
+
+      const createPageLink = (page, content, isCurrent = false, isDisabled = false) => {
+        const link = document.createElement("a");
+        link.href = "#";
+        link.innerHTML = content;
+        link.className = isCurrent 
+          ? "relative z-10 inline-flex items-center bg-primary px-4 py-2 text-sm font-semibold text-white"
+          : "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800";
+        if (!isDisabled) {
+          link.addEventListener("click", e => {
+            e.preventDefault();
+            currentPage = page;
+            render();
+          });
+        } else {
+          link.classList.add("opacity-50", "cursor-not-allowed");
+        }
+        return link;
+      };
+
+      paginationContainer.appendChild(createPageLink(currentPage - 1, `<span class='material-symbols-outlined h-5 w-5'>chevron_left</span>`, false, currentPage === 1));
+      for (let i = 1; i <= totalPages; i++) paginationContainer.appendChild(createPageLink(i, i, i === currentPage));
+      paginationContainer.appendChild(createPageLink(currentPage + 1, `<span class='material-symbols-outlined h-5 w-5'>chevron_right</span>`, false, currentPage === totalPages));
+    }
+
+    function updateSummary() {
+      const totalItems = filteredReports.length;
+      if (totalItems === 0) {
+        paginationSummary.textContent = "No reports";
+        return;
+      }
+      const startItem = (currentPage - 1) * rowsPerPage + 1;
+      const endItem = Math.min(startItem + rowsPerPage - 1, totalItems);
+      paginationSummary.textContent = `Showing ${startItem}-${endItem} of ${totalItems} reports`;
+    }
+
+    // --- FILTERING ---
+    function applyFilters() {
+      const authValue = filterAuth.value;
+      const statusValue = filterStatus.value;
+
+      filteredReports = originalReports.filter(report => {
+        const authMatch = !authValue || report.auth === authValue;
+        const statusMatch = !statusValue || report.status === statusValue;
+        return authMatch && statusMatch;
+      });
+
+      currentPage = 1;
+      render();
+    }
+
+    function clearFilters() {
+      filterAuth.value = "";
+      filterStatus.value = "";
+      applyFilters();
+    }
+
+    filterAuth.addEventListener("change", applyFilters);
+    filterStatus.addEventListener("change", applyFilters);
+    clearFiltersButton.addEventListener("click", clearFilters);
+
+    // --- INITIAL RENDER ---
+    render();

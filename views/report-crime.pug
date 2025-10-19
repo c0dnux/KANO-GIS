@@ -1,185 +1,114 @@
-doctype html
-html(lang="en")
-    head
-        meta(charset="utf-8")
-        title Crime Repo - Create Report
-        meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        link(href="https://fonts.googleapis.com", rel="preconnect")
-        link(crossorigin, href="https://fonts.gstatic.com", rel="preconnect")
-        link(href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap", rel="stylesheet")
-        link(href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined", rel="stylesheet")
-        script(src="https://cdn.tailwindcss.com?plugins=forms")
-        script(src="/js/tailwindjs.js")
-        script(type="module" src="/js/index.js")
-        style.
-            .material-symbols-outlined {
-                font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
-            }
-
-    body(class="font-display bg-background-light dark:bg-background-dark text-foreground-light dark:text-foreground-dark")
-        div(id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden")
-        div(class="relative flex min-h-screen")
-            // Sidebar
-            aside(id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-background-light dark:bg-background-dark border-r border-gray-300 dark:border-gray-700 flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0")
-                div(class="p-6 flex items-center justify-between")
-                    h1(class="text-xl font-bold text-gray-900 dark:text-gray-100") Crime Repo
-                    button(id="close-button" class="lg:hidden p-1 rounded-md text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700")
-                        span(class="material-symbols-outlined") close
-                nav(class="flex-1 px-4")
-                    ul(class="space-y-2")
-                        li
-                            a(href="#" class="flex items-center gap-3 px-3 py-2 rounded text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20")
-                                span(class="material-symbols-outlined") dashboard
-                                span(class="text-sm font-medium") Dashboard
-                        li
-                            a(href="/map" class="flex items-center gap-3 px-3 py-2 rounded text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20")
-                                span(class="material-symbols-outlined") map_search
-                                span(class="text-sm font-medium") Map
-                        li
-                            a(href="#" class="flex items-center gap-3 px-3 py-2 rounded text-white bg-primary")
-                                span(class="material-symbols-outlined") description
-                                span(class="text-sm font-medium") Reports
-                        li
-                            a(href="#" class="flex items-center gap-3 px-3 py-2 rounded text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20")
-                                span(class="material-symbols-outlined") analytics
-                                span(class="text-sm font-medium") Analytics
-                        li
-                            a(href="#" class="flex items-center gap-3 px-3 py-2 rounded text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20")
-                                span(class="material-symbols-outlined") group
-                                span(class="text-sm font-medium") Users
-                        li
-                            a(href="#" class="flex items-center gap-3 px-3 py-2 rounded text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20")
-                                span(class="material-symbols-outlined") settings
-                                span(class="text-sm font-medium") Settings
-
-            // Main Content
-            main(class="flex-1 p-4 md:p-8")
-                button(id="menu-button" class="lg:hidden mb-4 p-2 rounded-md text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700")
-                    span(class="material-symbols-outlined") menu
-
-                div(class="max-w-4xl mx-auto")
-                    // Header
-                    div(class="mb-8")
-                        h2(class="text-3xl font-bold text-gray-900 dark:text-gray-100") Report a Crime
-                        p(class="text-gray-500 dark:text-gray-400 mt-1") Please fill out the form below with as much detail as possible.
-
-                    // Form
-                    form(id="report-crime" class="bg-background-light dark:bg-background-dark border border-gray-300 dark:border-gray-700 rounded-lg p-6 space-y-6")
-                        div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
-                            // Crime Type
-                            div
-                                label(for="crime-type" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Type of Crime
-                                select(id="crime-type" required class="form-select w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
-                                    option(value="Theft") Theft
-                                    option(value="Assault") Assault
-                                    option(value="Fraud") Fraud
-                                    option(value="Murder") Murder
-                                    option(value="Kidnapping") Kidnapping
-                                    option(value="Vandalism") Vandalism
-                                    option(value="Other") Other
-
-                            // Date and Time
-                            div
-                                label(for="date" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Date & Time of Incident
-                                input(id="date" type="datetime-local" required class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
-
-                            // Address
-                            div(class="md:col-span-2")
-                                label(for="address" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Address
-                                input(id="address" type="text" placeholder="e.g., 123 Main Street" required class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
-
-                            // City
-                            div
-                                label(for="city" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") City / Area
-                                input(id="city" type="text" placeholder="e.g., Fagge" required class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
-
-                            // Local Government
-                            div
-                                label(for="location" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Local Government
-                                select(id="local-government" class="w-full rounded border-primary/30 bg-background-light dark:bg-background-dark/50 focus:ring-primary focus:border-primary text-gray-900 dark:text-gray-200")
-                                    option(value="Ajingi") Ajingi
-                                    option(value="Albasu") Albasu
-                                    option(value="Bagwai") Bagwai
-                                    option(value="Bebeji") Bebeji
-                                    option(value="Bichi") Bichi
-                                    option(value="Bunkure") Bunkure
-                                    option(value="Dala") Dala
-                                    option(value="Dambatta") Dambatta
-                                    option(value="Dawakin Kudu") Dawakin Kudu
-                                    option(value="Dawakin Tofa") Dawakin Tofa
-                                    option(value="Doguwa") Doguwa
-                                    option(value="Fagge") Fagge
-                                    option(value="Gabasawa") Gabasawa
-                                    option(value="Garko") Garko
-                                    option(value="Garun Mallam") Garun Mallam
-                                    option(value="Gaya") Gaya
-                                    option(value="Gezawa") Gezawa
-                                    option(value="Gwale") Gwale
-                                    option(value="Gwarzo") Gwarzo
-                                    option(value="Kabo") Kabo
-                                    option(value="Kano Municipal") Kano Municipal
-                                    option(value="Karaye") Karaye
-                                    option(value="Kibiya") Kibiya
-                                    option(value="Kiru") Kiru
-                                    option(value="Kumbotso") Kumbotso
-                                    option(value="Kunchi") Kunchi
-                                    option(value="Kura") Kura
-                                    option(value="Madobi") Madobi
-                                    option(value="Makoda") Makoda
-                                    option(value="Minjibir") Minjibir
-                                    option(value="Nasarawa") Nasarawa
-                                    option(value="Rano") Rano
-                                    option(value="Rimin Gado") Rimin Gado
-                                    option(value="Rogo") Rogo
-                                    option(value="Shanono") Shanono
-                                    option(value="Sumaila") Sumaila
-                                    option(value="Takai") Takai
-                                    option(value="Tarauni") Tarauni
-                                    option(value="Tofa") Tofa
-                                    option(value="Tsanyawa") Tsanyawa
-                                    option(value="Tudun Wada") Tudun Wada
-                                    option(value="Ungogo") Ungogo
-                                    option(value="Warawa") Warawa
-                                    option(value="Wudil") Wudil
+extends dashBase 
 
 
-                            // State
-                            div
-                                label(for="state" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") State
-                                input(id="state" type="text" value="Kano" readonly class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
+block content 
+    main(class="flex-1 p-4 md:p-8")
+        button(id="menu-button" class="lg:hidden mb-4 p-2 rounded-md text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700")
+            span(class="material-symbols-outlined") menu
 
-                            // Victims
-                            div
-                                label(for="victims" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Number of Victims
-                                input(id="victims" type="number" min="0" placeholder="0" class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary" required)
+        div(class="max-w-4xl mx-auto")
+            // Header
+            div(class="mb-8")
+                h2(class="text-3xl font-bold text-gray-900 dark:text-gray-100") Report a Crime
+                p(class="text-gray-500 dark:text-gray-400 mt-1") Please fill out the form below with as much detail as possible.
 
-                            // Description
-                            div(class="md:col-span-2")
-                                label(for="description" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Description
-                                textarea(id="description" rows="4" placeholder="Provide a detailed account of the incident..." required class="form-textarea w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
+            // Form
+            form(id="report-crime" class="bg-background-light dark:bg-background-dark border border-gray-300 dark:border-gray-700 rounded-lg p-6 space-y-6")
+                div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
+                    // Crime Type
+                    div
+                        label(for="crime-type" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Type of Crime
+                        select(id="crime-type" required class="form-select w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
+                            option(value="Theft") Theft
+                            option(value="Assault") Assault
+                            option(value="Fraud") Fraud
+                            option(value="Murder") Murder
+                            option(value="Kidnapping") Kidnapping
+                            option(value="Vandalism") Vandalism
+                            option(value="Other") Other
 
-                        // Form Actions
-                        div(class="flex justify-end gap-4 pt-4")
-                            button(type="button" class="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-bold py-2 px-4 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors") Cancel
-                            button(type="submit" class="bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/90 transition-colors") Submit Report
-        script(src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js" integrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA==" crossorigin="anonymous" referrerpolicy="no-referrer")
-        script.
-            const sidebar = document.getElementById("sidebar");
-            const menuButton = document.getElementById("menu-button");
-            const closeButton = document.getElementById("close-button");
-            const overlay = document.getElementById("sidebar-overlay");
+                    // Date and Time
+                    div
+                        label(for="date" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Date & Time of Incident
+                        input(id="date" type="datetime-local" required class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
 
-            function openSidebar() {
-                sidebar.classList.remove("-translate-x-full");
-                overlay.classList.remove("hidden");
-            }
+                    // Address
+                    div(class="md:col-span-2")
+                        label(for="address" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Address
+                        input(id="address" type="text" placeholder="e.g., 123 Main Street" required class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
 
-            function closeSidebar() {
-                sidebar.classList.add("-translate-x-full");
-                overlay.classList.add("hidden");
-            }
+                    // City
+                    div
+                        label(for="city" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") City / Area
+                        input(id="city" type="text" placeholder="e.g., Fagge" required class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
 
-            menuButton.addEventListener("click", openSidebar);
-            closeButton.addEventListener("click", closeSidebar);
-            overlay.addEventListener("click", closeSidebar);
-            
+                    // Local Government
+                    div
+                        label(for="location" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Local Government
+                        select(id="local-government" class="w-full rounded border-primary/30 bg-background-light dark:bg-background-dark/50 focus:ring-primary focus:border-primary text-gray-900 dark:text-gray-200")
+                            option(value="Ajingi") Ajingi
+                            option(value="Albasu") Albasu
+                            option(value="Bagwai") Bagwai
+                            option(value="Bebeji") Bebeji
+                            option(value="Bichi") Bichi
+                            option(value="Bunkure") Bunkure
+                            option(value="Dala") Dala
+                            option(value="Dambatta") Dambatta
+                            option(value="Dawakin Kudu") Dawakin Kudu
+                            option(value="Dawakin Tofa") Dawakin Tofa
+                            option(value="Doguwa") Doguwa
+                            option(value="Fagge") Fagge
+                            option(value="Gabasawa") Gabasawa
+                            option(value="Garko") Garko
+                            option(value="Garun Mallam") Garun Mallam
+                            option(value="Gaya") Gaya
+                            option(value="Gezawa") Gezawa
+                            option(value="Gwale") Gwale
+                            option(value="Gwarzo") Gwarzo
+                            option(value="Kabo") Kabo
+                            option(value="Kano Municipal") Kano Municipal
+                            option(value="Karaye") Karaye
+                            option(value="Kibiya") Kibiya
+                            option(value="Kiru") Kiru
+                            option(value="Kumbotso") Kumbotso
+                            option(value="Kunchi") Kunchi
+                            option(value="Kura") Kura
+                            option(value="Madobi") Madobi
+                            option(value="Makoda") Makoda
+                            option(value="Minjibir") Minjibir
+                            option(value="Nasarawa") Nasarawa
+                            option(value="Rano") Rano
+                            option(value="Rimin Gado") Rimin Gado
+                            option(value="Rogo") Rogo
+                            option(value="Shanono") Shanono
+                            option(value="Sumaila") Sumaila
+                            option(value="Takai") Takai
+                            option(value="Tarauni") Tarauni
+                            option(value="Tofa") Tofa
+                            option(value="Tsanyawa") Tsanyawa
+                            option(value="Tudun Wada") Tudun Wada
+                            option(value="Ungogo") Ungogo
+                            option(value="Warawa") Warawa
+                            option(value="Wudil") Wudil
+
+
+                    // State
+                    div
+                        label(for="state" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") State
+                        input(id="state" type="text" value="Kano" readonly class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
+
+                    // Victims
+                    div
+                        label(for="victims" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Number of Victims
+                        input(id="victims" type="number" min="0" placeholder="0" class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary" required)
+
+                    // Description
+                    div(class="md:col-span-2")
+                        label(for="description" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Description
+                        textarea(id="description" rows="4" placeholder="Provide a detailed account of the incident..." required class="form-textarea w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
+
+                // Form Actions
+                div(class="flex justify-end gap-4 pt-4")
+                    button(type="button" class="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-bold py-2 px-4 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors") Cancel
+                    button(type="submit" class="bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/90 transition-colors") Submit Report
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js" integrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA==" crossorigin="anonymous" referrerpolicy="no-referrer")

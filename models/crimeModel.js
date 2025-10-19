@@ -30,12 +30,12 @@ const crimeReportSchema = new mongoose.Schema(
     date: { required: [true, "Date is required"], type: Date, required: true },
     status: {
       type: String,
-      enum: ["Unknown", "Under Investigation", "Resolved", "Closed"],
+      enum: ["Unknown", "Under Investigation", "Resolved"],
       default: "Unknown",
     },
     crimeAuth: {
       type: String,
-      enum: ["pending", "verified", "fake"],
+      enum: ["Pending", "Verified", "Fake"],
       default: "pending",
     },
     location: {

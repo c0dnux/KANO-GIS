@@ -41,7 +41,10 @@ html(lang="en")
             p.mt-4.max-w-2xl.mx-auto.text-lg.text-slate-200
               | The premier GIS-based crime analysis and reporting system for Kano State. Track, analyze, and combat crime with cutting-edge technology.
             .mt-8.flex.gap-4.justify-center
-              a(class="bg-primary text-white px-6 py-3 rounded-lg text-lg font-bold hover:bg-opacity-90 transition-transform transform hover:scale-105", href="#") Report Crime
+              if user
+                a(class="bg-primary text-white px-6 py-3 rounded-lg text-lg font-bold hover:bg-opacity-90 transition-transform transform hover:scale-105", href="/report-crime") Report Crime
+              else
+                a(class="bg-primary text-white px-6 py-3 rounded-lg text-lg font-bold hover:bg-opacity-90 transition-transform transform hover:scale-105", href="/login") Report Crime
               a(class="bg-white/10 text-white px-6 py-3 rounded-lg text-lg font-bold hover:bg-white/20 transition-colors", href="/map") Check Map
 
         section(class="py-16 md:py-24 bg-white dark:bg-slate-900/50")
