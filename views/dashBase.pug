@@ -7,6 +7,7 @@ html(lang="en")
         link(crossorigin, href="https://fonts.gstatic.com", rel="preconnect")
         link(href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap", rel="stylesheet")
         link(href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined", rel="stylesheet")
+        link(rel="icon" type="image/png" href="/favicon.png")
         script(src="https://cdn.tailwindcss.com?plugins=forms")
         script(src="/js/tailwindjs.js")
         script(type="module" src="/js/index.js")
@@ -24,7 +25,8 @@ html(lang="en")
                 div(class="p-6 flex items-center justify-between")
                     div(class="flex items-center gap-2")
                         span(class="material-symbols-outlined text-primary text-2xl") local_police
-                        h1(class="text-xl font-bold text-gray-900 dark:text-gray-100") Crime Repo
+                        a(href="/" class="text-xl font-bold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors")
+                            h1 Crime Repo
                     button(id="close-button" class="lg:hidden p-1 rounded-md text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700")
                         span(class="material-symbols-outlined") close
                 nav(class="flex-1 px-4")
@@ -33,7 +35,6 @@ html(lang="en")
                         a(href="#" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'dashboard' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
                             span(class="material-symbols-outlined") dashboard
                             span(class="text-sm font-medium") Dashboard
-
                         li
                         a(href="/map" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'map' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
                             span(class="material-symbols-outlined") map_search
@@ -43,16 +44,23 @@ html(lang="en")
                         a(href="/report-crime" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'report' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
                             span(class="material-symbols-outlined") description
                             span(class="text-sm font-medium") Report Crime
-
+                        if page==='update'
+                            li
+                            a( class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'update' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
+                                span(class="material-symbols-outlined") update
+                                span(class="text-sm font-medium") View / Update Report
                         li
                         a(href="/all-crimes" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'all-crimes' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
                             span(class="material-symbols-outlined") all_inclusive
                             span(class="text-sm font-medium") All Reports
-
                         li
-                        a(href="/analytics" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'analytics' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
+                        a(href="#" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'analytics' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
                             span(class="material-symbols-outlined") analytics
                             span(class="text-sm font-medium") Analytics
+                        li
+                        a(href="#" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'settings' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
+                            span(class="material-symbols-outlined") settings
+                            span(class="text-sm font-medium") Settings
 
                 div(class="p-4 border-t border-gray-200 dark:border-gray-700")
                     div(class="flex items-center gap-4")

@@ -119,12 +119,10 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     .render("forgot-password", { title: "Crime Repo - Forgot password" });
 });
 exports.reportCrime = catchAsync(async (req, res, next) => {
-  res
-    .status(200)
-    .render("report-crime", {
-      title: "Crime Repo - Report a crime",
-      page: "report",
-    });
+  res.status(200).render("report-crime", {
+    title: "Crime Repo - Report a crime",
+    page: "report",
+  });
 });
 exports.allCrimes = catchAsync(async (req, res, next) => {
   const crimedata = await Crime.find();
@@ -141,5 +139,32 @@ exports.allCrimes = catchAsync(async (req, res, next) => {
     page: "all-crimes",
     crimes: formatted,
     title: "Crime Repo - All Crimes",
+  });
+});
+exports.viewUpdateCrime = catchAsync(async (req, res, next) => {
+  const reportId = req.params.id;
+  const crime = await Crime.findOne({ reportId: reportId });
+  if (!crime) {
+    return next(new AppError("No crime found with that ID", 404));
+  }
+  if (crime.date && crime.createdAt) {
+    const crimeDate = new Date(crime.date);
+    const createdAtDate = new Date(crime.createdAt);
+    crime.formattedDate = crimeDate.toISOString().slice(0, 16); // e.g., 2025-09-18T00:00
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    };
+
+    crime.formattedCreatedAt = createdAtDate.toLocaleString("en-US", options);
+  }
+  res.status(200).render("view-update-crime", {
+    title: "Crime Repo - Update Crime Report",
+    page: "update",
+    crime,
   });
 });

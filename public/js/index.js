@@ -6,7 +6,14 @@ const resetPasswordForm = document.getElementById("reset-password-form");
 const forgotPassword = document.getElementById("forgot-password");
 const forgetPasswordfunc = document.getElementById("forgot-password-func");
 const reportCrimeForm = document.getElementById("report-crime");
-import { auth, logout, forgetPassword, reportCrime } from "./auth.js";
+const updateReportForm = document.getElementById("view-update-form");
+import {
+  auth,
+  logout,
+  forgetPassword,
+  reportCrime,
+  updateReport,
+} from "./auth.js";
 // --- MAP LOGIC ---
 // 1. Find the map element in the document
 const mapElement = document.getElementById("map");
@@ -110,5 +117,27 @@ if (reportCrimeForm) {
     };
 
     await reportCrime(data);
+  });
+}
+///////--------UPDATE REPORT FORM LOGIC ---------//////
+
+if (updateReportForm) {
+  // --- NEW ---
+  // 1. Capture the initial data *when the page loads*.
+  const initialData = {};
+  const formElements = updateReportForm.elements;
+  for (const element of formElements) {
+    if (element.name) {
+      initialData[element.name] = element.value;
+    }
+  }
+  console.log("Initial data captured on load:", initialData);
+  // --- END NEW ---
+
+  updateReportForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    // 2. Pass both the form AND the initial data to your function.
+    updateReport(updateReportForm, initialData);
   });
 }

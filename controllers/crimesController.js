@@ -86,17 +86,20 @@ exports.getCrime = catchAsync(async (req, res, next) => {
     data: crime,
   });
 });
-exports.crimeAuth = catchAsync(async (req, res, next) => {
+exports.updateCrime = catchAsync(async (req, res, next) => {
+  console.log("Update", req.body);
+
   const crime = await Crime.findOneAndUpdate(
     { reportId: req.params.reportId },
-    { $set: { crimeAuth: req.body.crimeAuth } },
+    { $set: req.body },
     { new: true, runValidators: true }
   );
   if (!crime) {
     return next(new AppError("No crime found with that ID", 404));
   }
   res.status(200).json({
-    status: "success",
-    data: crime,
+    status: "Success",
+    message: "Crime updated successfully",
+    // data: crime,
   });
 });

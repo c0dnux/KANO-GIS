@@ -64,3 +64,39 @@ export const reportCrime = async (formData) => {
     showAlert("error", err.response.data.message);
   }
 };
+///-------UPDATE REPORT--------//////
+
+export const updateReport = async (form, initialData) => {
+  const reportId = form.dataset.id;
+
+  const formElements = form.elements;
+  const changedData = {};
+
+  // Compare current values with the initial ones passed into the function.
+  for (const element of formElements) {
+    if (element.name && initialData[element.name] !== element.value) {
+      changedData[element.name] = element.value;
+    }
+  }
+
+  if (Object.keys(changedData).length > 0) {
+    console.log("Hola backend ", changedData);
+
+    try {
+      const res = await axios.patch(
+        `/api/v1/crimes/crime-update/${reportId}`,
+        changedData
+      );
+      if (res.data.status === "Success") {
+        showAlert("success", res.data.message);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+    } catch (err) {
+      showAlert("error", err.response.data.message);
+    }
+  } else {
+    showAlert("error", "No changes made.");
+  }
+};

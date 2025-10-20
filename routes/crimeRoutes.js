@@ -6,9 +6,9 @@ const authController = require("../controllers/authController");
 router.post("/report", authController.protect, crimeController.reportCrime);
 router.post("/allCrimes", authController.protect, crimeController.getAllCrimes);
 router.patch(
-  "/crimeAuth/:reportId",
+  "/crime-update/:reportId",
   authController.protect,
-  crimeController.crimeAuth
+  crimeController.updateCrime
 );
 router.post("/:reportId", authController.protect, crimeController.getCrime);
 module.exports = router;

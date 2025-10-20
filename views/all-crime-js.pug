@@ -1,0 +1,203 @@
+script.
+    const originalReports = !{JSON.stringify(crimes)};
+
+    // --- STATE MANAGEMENT ---
+
+    let filteredReports = [...originalReports];
+    const rowsPerPage = 20;
+    let currentPage = 1;
+
+    // --- ELEMENTS ---
+    const reportTableBody = document.getElementById("report-table");
+    const paginationContainer = document.getElementById("pagination");
+    const paginationSummary = document.getElementById("pagination-summary");
+    const filterAuth = document.getElementById("filter-auth");
+    const filterStatus = document.getElementById("filter-status");
+    const clearFiltersButton = document.getElementById("clear-filters");
+
+    // --- HELPERS ---
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, match => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+        }[match]));
+    }
+
+    function getStatusBadgeClass(status) {
+        const s = status.toLowerCase();
+        if (s === "resolved") return "status-badge status-open";
+        if (s === "unknown") return "status-badge status-closed";
+        if (s === "under investigation") return "status-badge status-in-progress";
+        return "status-badge";
+    }
+
+    function getAuthBadgeClass(auth) {
+        const a = auth.toLowerCase();
+        if (a === "verified") return "status-badge status-verified";
+        if (a === "pending") return "status-badge status-pending";
+        if (a === "fake") return "status-badge status-fake";
+        return "status-badge";
+    }
+
+    // --- RENDERING ---
+    function render() {
+        renderTable();
+        renderPagination();
+        updateSummary();
+    }
+
+    function renderTable() {
+        reportTableBody.innerHTML = "";
+        const start = (currentPage - 1) * rowsPerPage;
+        const paginatedItems = filteredReports.slice(start, start + rowsPerPage);
+
+        if (paginatedItems.length === 0) {
+            reportTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-500 dark:text-gray-400">No reports found.</td></tr>`;
+            return;
+        }
+
+        paginatedItems.forEach(r => {
+            const tr = document.createElement("tr");
+            tr.className = "hover:bg-background-light/50 dark:hover:bg-gray-800/50 transition-colors";
+            tr.innerHTML = `
+                <td class="px-6 py-4 max-w-[250px] truncate text-gray-800 dark:text-gray-200 font-medium" title="${escapeHtml(r.description)}">
+                ${escapeHtml(r.description.length > 80 ? r.description.substring(0, 80) + '...' : r.description)}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap"><span class="${getStatusBadgeClass(r.status)}">${escapeHtml(r.status)}</span></td>
+                <td class="px-6 py-4 whitespace-nowrap"><span class="${getAuthBadgeClass(r.auth)}">${escapeHtml(r.auth)}</span></td>
+                <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">${escapeHtml(r.date)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                <a href="/crime/${r.id}" class="text-primary hover:underline font-medium">View</a>
+                </td>
+            `;
+            reportTableBody.appendChild(tr);
+        });
+
+    }
+
+    // A more advanced pagination function
+    function renderPagination() {
+    paginationContainer.innerHTML = "";
+    const totalPages = Math.max(1, Math.ceil(filteredReports.length / rowsPerPage));
+    if (totalPages <= 1) return;
+
+    const createPageLink = (page, content, isCurrent = false, isDisabled = false, isEllipsis = false) => {
+        const elType = isEllipsis ? "span" : "a"; // Use <span> for "..."
+        const link = document.createElement(elType);
+
+        if (elType === 'a') link.href = "#";
+
+        link.innerHTML = content;
+
+        // Base classes
+        let classes = "relative inline-flex items-center px-4 py-2 text-sm font-semibold ";
+
+        if (isCurrent) {
+            classes += "z-10 bg-primary text-white";
+            link.setAttribute("aria-current", "page");
+        } else if (isDisabled) {
+            classes += "text-gray-900 dark:text-gray-100 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 opacity-50 cursor-not-allowed";
+        } else if (isEllipsis) {
+            classes += "text-gray-900 dark:text-gray-100 ring-1 ring-inset ring-gray-300 dark:ring-gray-700";
+        } else {
+            classes += "text-gray-900 dark:text-gray-100 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800";
+        }
+
+        link.className = classes.trim();
+
+        if (elType === 'a' && !isDisabled) {
+            link.addEventListener("click", e => {
+                e.preventDefault();
+                currentPage = page;
+                render();
+            });
+        }
+        return link;
+    };
+
+    // Add "Previous" button
+    paginationContainer.appendChild(createPageLink(currentPage - 1, `<span class='material-symbols-outlined h-5 w-5'>chevron_left</span>`, false, currentPage === 1));
+
+    // --- New Pagination Logic ---
+    const maxPagesToShow = 7; // Total items: 1, 2, 3 ... 8, 9, 10
+    if (totalPages <= maxPagesToShow) {
+        // Show all pages if total is small
+        for (let i = 1; i <= totalPages; i++) {
+            paginationContainer.appendChild(createPageLink(i, i, i === currentPage));
+        }
+    } else {
+        // Show truncated pages
+        let pages = [];
+        pages.push(createPageLink(1, 1, currentPage === 1)); // Always show page 1
+
+        let start = Math.max(2, currentPage - 2);
+        let end = Math.min(totalPages - 1, currentPage + 2);
+
+        if (currentPage <= 4) {
+            start = 2;
+            end = 5;
+        }
+        if (currentPage >= totalPages - 3) {
+            start = totalPages - 4;
+            end = totalPages - 1;
+        }
+
+        if (start > 2) {
+            pages.push(createPageLink(0, "...", false, false, true)); // Ellipsis at start
+        }
+
+        for (let i = start; i <= end; i++) {
+            pages.push(createPageLink(i, i, i === currentPage));
+        }
+
+        if (end < totalPages - 1) {
+            pages.push(createPageLink(0, "...", false, false, true)); // Ellipsis at end
+        }
+
+        pages.push(createPageLink(totalPages, totalPages, currentPage === totalPages)); // Always show last page
+
+        pages.forEach(page => paginationContainer.appendChild(page));
+    }
+    // --- End of New Logic ---
+
+    // Add "Next" button
+    paginationContainer.appendChild(createPageLink(currentPage + 1, `<span class='material-symbols-outlined h-5 w-5'>chevron_right</span>`, false, currentPage === totalPages));
+    }
+
+    function updateSummary() {
+        const totalItems = filteredReports.length;
+        if (totalItems === 0) {
+            paginationSummary.textContent = "No reports";
+            return;
+        }
+        const startItem = (currentPage - 1) * rowsPerPage + 1;
+        const endItem = Math.min(startItem + rowsPerPage - 1, totalItems);
+        paginationSummary.textContent = `Showing ${startItem}-${endItem} of ${totalItems} reports`;
+    }
+
+    // --- FILTERING ---
+    function applyFilters() {
+        const authValue = filterAuth.value;
+        const statusValue = filterStatus.value;
+
+        filteredReports = originalReports.filter(report => {
+            const authMatch = !authValue || report.auth === authValue;
+            const statusMatch = !statusValue || report.status === statusValue;
+            return authMatch && statusMatch;
+        });
+
+        currentPage = 1;
+        render();
+    }
+
+    function clearFilters() {
+        filterAuth.value = "";
+        filterStatus.value = "";
+        applyFilters();
+    }
+
+    filterAuth.addEventListener("change", applyFilters);
+    filterStatus.addEventListener("change", applyFilters);
+    clearFiltersButton.addEventListener("click", clearFilters);
+
+    // --- INITIAL RENDER ---
+    render();

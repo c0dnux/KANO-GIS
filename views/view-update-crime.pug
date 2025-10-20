@@ -1,78 +1,82 @@
-extends dashBase 
-
+extends dashBase
 
 block content 
     main(class="flex-1 p-4 sm:p-8")
+        button(id="menu-button" class="lg:hidden mb-4 p-2 rounded-md text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700")
+            span(class="material-symbols-outlined") menu
+
         div(class="max-w-4xl mx-auto")
-            div(class="flex items-center mb-6 text-sm text-subtle-light dark:text-subtle-dark")
-                a(class="hover:underline text-primary" href="#") Reports
+            // Breadcrumbs
+            div(class="flex items-center mb-6 text-sm text-gray-500 dark:text-gray-400")
+                a(class="hover:underline text-primary" href="/all-crimes") Reports
                 span(class="mx-2") /
                 span Edit Report
 
+            // Header Info
             div(class="mb-8")
-                h2(class="text-3xl font-bold text-foreground-light dark:text-foreground-dark") Report #20240726-001
-                p(class="text-subtle-light dark:text-subtle-dark mt-1") Submitted on July 26, 2024, 10:30 AM
+                h2(class="text-3xl font-bold text-gray-900 dark:text-gray-100") Report ##{crime.reportId}
+                p(class="text-gray-500 dark:text-gray-400 mt-1") Submitted on #{crime.formattedCreatedAt}
 
             // Report Form
-            form(id="report-form" class="bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-lg p-6")
-                h3(class="text-xl font-bold mb-6 text-foreground-light dark:text-foreground-dark") Edit Incident Details
+            form(id="view-update-form" data-id=crime.reportId class="bg-background-light dark:bg-background-dark border border-gray-300 dark:border-gray-700 rounded-lg p-6")
+                h3(class="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100") Edit Incident Details
                 div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
 
                     // Type of Crime (Display Only)
                     div
-                        label(for="crime-type" class="block text-sm font-medium text-foreground-light dark:text-foreground-dark mb-2") Type of Crime
-                        input(type="text" id="crime-type" name="crime_type" value="Theft" disabled class="form-input w-full rounded border-border-light dark:border-border-dark bg-gray-100 dark:bg-gray-800 text-subtle-light dark:text-subtle-dark cursor-not-allowed")
+                        label(for="crime-type" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Type of Crime
+                        input(type="text" id="crime-type" name="crime_type" value=`${crime.crimeType}` disabled class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 cursor-not-allowed")
 
                     // City
                     div
-                        label(for="city" class="block text-sm font-medium text-foreground-light dark:text-foreground-dark mb-2") City
-                        input(type="text" id="city" name="city" value="Kano" class="form-input w-full rounded border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-foreground-light dark:text-foreground-dark focus:ring-primary focus:border-primary")
+                        label(for="city" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") City
+                        input(type="text" id="city" name="city" value=`${crime.location.city}` disabled class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 cursor-not-allowed")
 
                     // Local Government
                     div
-                        label(for="local-government" class="block text-sm font-medium text-foreground-light dark:text-foreground-dark mb-2") Local Government
-                        input(type="text" id="local-government" name="local_government" value="Fagge" class="form-input w-full rounded border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-foreground-light dark:text-foreground-dark focus:ring-primary focus:border-primary")
+                        label(for="local-government" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Local Government
+                        input(type="text" id="local-government" name="local_government" value=`${crime.location.localGovernment}` disabled class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 cursor-not-allowed")
 
                     // Address
                     div
-                        label(for="address" class="block text-sm font-medium text-foreground-light dark:text-foreground-dark mb-2") Address
-                        input(type="text" id="address" name="address" value="Near the market" class="form-input w-full rounded border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-foreground-light dark:text-foreground-dark focus:ring-primary focus:border-primary")
+                        label(for="address" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Address
+                        input(type="text" id="address" name="address" value=`${crime.location.address}` disabled class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 cursor-not-allowed")
 
                     // Date and Time
                     div
-                        label(for="datetime" class="block text-sm font-medium text-foreground-light dark:text-foreground-dark mb-2") Date & Time
-                        input(type="datetime-local" id="datetime" name="datetime" value="2024-07-25T20:00" class="form-input w-full rounded border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-foreground-light dark:text-foreground-dark focus:ring-primary focus:border-primary")
+                        label(for="datetime" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Date & Time
+                        input(type="datetime-local" id="date" name="date" value=`${crime.formattedDate}` class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
 
                     // Number of Victims
                     div
-                        label(for="victims" class="block text-sm font-medium text-foreground-light dark:text-foreground-dark mb-2") Number of Victims
-                        input(type="number" id="victims" name="victims" value="1" min="0" class="form-input w-full rounded border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-foreground-light dark:text-foreground-dark focus:ring-primary focus:border-primary")
+                        label(for="victims" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Number of Victims
+                        input(type="number" id="victims" name="victims" value=`${crime.victims}` min="0" class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
 
                     // Description
                     div(class="md:col-span-2")
-                        label(for="description" class="block text-sm font-medium text-foreground-light dark:text-foreground-dark mb-2") Description
-                        textarea(id="description" name="description" rows="4" class="form-textarea w-full rounded border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-foreground-light dark:text-foreground-dark focus:ring-primary focus:border-primary") A mobile phone was stolen from a person near the market.
+                        label(for="description" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Description
+                        textarea(id="description" name="description" rows="4" class="form-textarea w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary") #{crime.description}
 
                     // Report Status
                     div
-                        label(for="report-status" class="block text-sm font-medium text-foreground-light dark:text-foreground-dark mb-2") Report Status
-                        select(id="report-status" name="status" class="form-select w-full rounded border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-foreground-light dark:text-foreground-dark focus:ring-primary focus:border-primary")
-                            option New
-                            option(selected) Under Investigation
-                            option Resolved
-                            option Closed
+                        label(for="report-status" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Report Status
+                        select(id="report-status" name="status" class="form-select w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
+                            option(selected=(crime.status === 'Under Investigation')) Under Investigation
+                            option(selected=(crime.status === 'Resolved')) Resolved
+                            option(selected=(crime.status === 'Unknown')) Unknown
 
                     // Report Authenticity
                     div
-                        label(for="report-authenticity" class="block text-sm font-medium text-foreground-light dark:text-foreground-dark mb-2") Report Authenticity
-                        select(id="report-authenticity" name="authenticity" class="form-select w-full rounded border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-foreground-light dark:text-foreground-dark focus:ring-primary focus:border-primary")
-                            option(selected) Unverified
-                            option Verified
-                            option Fake
+                        label(for="report-authenticity" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Report Authenticity
+                        select(id="report-authenticity" name="crimeAuth" class="form-select w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
+                            option(selected=(crime.crimeAuth === 'Pending')) Pending
+                            option(selected=(crime.crimeAuth === 'Verified')) Verified
+                            option(selected=(crime.crimeAuth === 'Fake')) Fake
 
                 // Actions
                 div(class="mt-8 flex justify-end gap-4")
-                    button(type="button" class="bg-gray-200 dark:bg-gray-700 text-foreground-light dark:text-foreground-dark font-bold py-2 px-4 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors") Cancel
+                    button(type="button" class="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-bold py-2 px-4 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors") Cancel
                     button(type="submit" class="bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/90 transition-colors") Update Report
 
-
+    // Axios script
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js" integrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA==" crossorigin="anonymous" referrerpolicy="no-referrer")
