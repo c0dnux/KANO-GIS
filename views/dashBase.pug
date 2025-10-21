@@ -1,71 +1,84 @@
 html(lang="en")
-    head
-        meta(charset="utf-8")
-        title=title
-        meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        link(href="https://fonts.googleapis.com", rel="preconnect")
-        link(crossorigin, href="https://fonts.gstatic.com", rel="preconnect")
-        link(href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap", rel="stylesheet")
-        link(href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined", rel="stylesheet")
-        link(rel="icon" type="image/png" href="/favicon.png")
-        script(src="https://cdn.tailwindcss.com?plugins=forms")
-        script(src="/js/tailwindjs.js")
-        script(type="module" src="/js/index.js")
-        script(src="/js/burger-toggle.js")
-        style.
-            .material-symbols-outlined {
-                font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
-            }
+  head
+    meta(charset="utf-8")
+    title=title
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    link(href="https://fonts.googleapis.com", rel="preconnect")
+    link(crossorigin, href="https://fonts.gstatic.com", rel="preconnect")
+    link(href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap", rel="stylesheet")
+    link(href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined", rel="stylesheet")
+    link(rel="icon" type="image/png" href="/favicon.png")
+    script(src="https://cdn.tailwindcss.com?plugins=forms")
+    script(src="/js/tailwindjs.js")
+    script(type="module" src="/js/index.js")
+    script(src="/js/burger-toggle.js")
+    style.
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
 
-    body(class="font-display bg-background-light dark:bg-background-dark text-foreground-light dark:text-foreground-dark")
-        div(id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden")
-        div(class="relative flex min-h-screen")
-            // Sidebar
-            aside(id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-background-light dark:bg-background-dark border-r border-gray-300 dark:border-gray-700 flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0")
-                div(class="p-6 flex items-center justify-between")
-                    div(class="flex items-center gap-2")
-                        span(class="material-symbols-outlined text-primary text-2xl") local_police
-                        a(href="/" class="text-xl font-bold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors")
-                            h1 Crime Repo
-                    button(id="close-button" class="lg:hidden p-1 rounded-md text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700")
-                        span(class="material-symbols-outlined") close
-                nav(class="flex-1 px-4")
-                    ul(class="space-y-2")
-                        li
-                        a(href="#" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'dashboard' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
-                            span(class="material-symbols-outlined") dashboard
-                            span(class="text-sm font-medium") Dashboard
-                        li
-                        a(href="/map" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'map' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
-                            span(class="material-symbols-outlined") map_search
-                            span(class="text-sm font-medium") Map
+  body(class="font-display bg-background-light dark:bg-background-dark text-foreground-light dark:text-foreground-dark min-h-screen flex flex-col")
+    
+    // Header - FULL WIDTH
+    header(class="sticky top-0 z-30 w-screen bg-background-light dark:bg-background-dark border-b border-gray-300 dark:border-gray-700 p-4 flex items-center justify-between")
+      div(class="flex items-center gap-2")
+        span(class="material-symbols-outlined text-primary text-2xl") local_police
+        a(href="/" class="text-xl font-bold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors")
+          h1 Crime Repo
 
-                        li
-                        a(href="/report-crime" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'report' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
-                            span(class="material-symbols-outlined") description
-                            span(class="text-sm font-medium") Report Crime
-                        if page==='update'
-                            li
-                            a( class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'update' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
-                                span(class="material-symbols-outlined") update
-                                span(class="text-sm font-medium") View / Update Report
-                        li
-                        a(href="/all-crimes" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'all-crimes' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
-                            span(class="material-symbols-outlined") all_inclusive
-                            span(class="text-sm font-medium") All Reports
-                        li
-                        a(href="#" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'analytics' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
-                            span(class="material-symbols-outlined") analytics
-                            span(class="text-sm font-medium") Analytics
-                        li
-                        a(href="#" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'settings' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
-                            span(class="material-symbols-outlined") settings
-                            span(class="text-sm font-medium") Settings
+      button(id="menu-button" class="lg:hidden p-2 rounded-md text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700")
+        span(class="material-symbols-outlined") menu
 
-                div(class="p-4 border-t border-gray-200 dark:border-gray-700")
-                    div(class="flex items-center gap-4")
-                        div(class="w-10 h-10 rounded-full bg-cover bg-center", style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDO1qaHatVy5a23NK8Z9MSpw07xb26E84F4TNc9fh8h6eWstnW1QxIIRalNqhX6uaEOIGCGt1l6G3fXIpVOKQ-0BM6MezyHj_tmS4BykWiCNwR3HJakI3VorwjGxOw3mAtXx1pNPffrGaHh08FqtS0ntt7sWcvImX505_Ap9CyjtRr9q7dfpu_qubbZw_fEbREWs2mA_MZY2gfB1s-T2oKb0T_moreeL2mVVKk_gd9tuncOQdXCrfnDW0wbKlOlY9S30eHm6XDTD7c");')
-                        div
-                            p(class="text-sm font-medium text-gray-900 dark:text-white") Admin User
-                            a(href="#", class="text-xs text-red-500 hover:underline") Logout
-            block content
+    // Overlay for mobile sidebar
+    div(id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden")
+
+    // MAIN WRAPPER (Sidebar + Content)
+    div(class="flex flex-1 w-full overflow-hidden")
+      // Sidebar
+      aside(id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-background-light dark:bg-background-dark border-r border-gray-300 dark:border-gray-700 flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out lg:relative lg:z-auto lg:translate-x-0")
+        div(class="p-4 flex justify-end lg:hidden")
+          button(id="close-button" class="p-1 rounded-md text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700")
+            span(class="material-symbols-outlined") close
+
+        nav(class="flex-1 px-4 py-4")
+          ul(class="space-y-2")
+            li
+              a(href="#" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'dashboard' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
+                span(class="material-symbols-outlined") dashboard
+                span(class="text-sm font-medium") Dashboard
+            li
+              a(href="/map" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'map' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
+                span(class="material-symbols-outlined") map_search
+                span(class="text-sm font-medium") Map
+            li
+              a(href="/report-crime" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'report' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
+                span(class="material-symbols-outlined") description
+                span(class="text-sm font-medium") Report Crime
+            if page==='update'
+              li
+                a(class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'update' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
+                  span(class="material-symbols-outlined") update
+                  span(class="text-sm font-medium") View / Update Report
+            li
+              a(href="/all-crimes" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'all-crimes' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
+                span(class="material-symbols-outlined") all_inclusive
+                span(class="text-sm font-medium") All Reports
+            li
+              a(href="#" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'analytics' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
+                span(class="material-symbols-outlined") analytics
+                span(class="text-sm font-medium") Analytics
+            li
+              a(href="#" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'settings' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
+                span(class="material-symbols-outlined") settings
+                span(class="text-sm font-medium") Settings
+
+        div(class="p-4 border-t border-gray-200 dark:border-gray-700")
+          div(class="flex items-center gap-4")
+            div(class="w-10 h-10 rounded-full bg-cover bg-center", style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDO1qaHatVy5a23NK8Z9MSpw07xb26E84F4TNc9fh8h6eWstnW1QxIIRalNqhX6uaEOIGCGt1l6G3fXIpVOKQ-0BM6MezyHj_tmS4BykWiCNwR3HJakI3VorwjGxOw3mAtXx1pNPffrGaHh08FqtS0ntt7sWcvImX505_Ap9CyjtRr9q7dfpu_qubbZw_fEbREWs2mA_MZY2gfB1s-T2oKb0T_moreeL2mVVKk_gd9tuncOQdXCrfnDW0wbKlOlY9S30eHm6XDTD7c");')
+            div
+              p(class="text-sm font-medium text-gray-900 dark:text-white") Admin User
+              a(id="logout-btn" class="text-xs text-red-500 hover:underline") Logout
+
+      // Main Content (Page-Specific)
+      main(class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark p-4 sm:p-6 lg:p-8")
+        block content

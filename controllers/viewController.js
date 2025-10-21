@@ -145,12 +145,22 @@ exports.viewUpdateCrime = catchAsync(async (req, res, next) => {
   const reportId = req.params.id;
   const crime = await Crime.findOne({ reportId: reportId });
   if (!crime) {
-    return next(new AppError("No crime found with that ID", 404));
+    return next(new AppError("Crime not available", 404));
   }
+
   if (crime.date && crime.createdAt) {
     const crimeDate = new Date(crime.date);
     const createdAtDate = new Date(crime.createdAt);
-    crime.formattedDate = crimeDate.toISOString().slice(0, 16); // e.g., 2025-09-18T00:00
+    const year = crimeDate.getFullYear();
+    
+    const month = String(crimeDate.getMonth() + 1).padStart(2, "0");
+    const day = String(crimeDate.getDate()).padStart(2, "0");
+    const hours = String(crimeDate.getHours()).padStart(2, "0");
+    const minutes = String(crimeDate.getMinutes()).padStart(2, "0");
+
+    // Construct the string required by <input type="datetime-local">
+    crime.formattedDate = `${year}-${month}-${day}T${hours}:${minutes}`;
+  
     const options = {
       year: "numeric",
       month: "long",
@@ -162,6 +172,7 @@ exports.viewUpdateCrime = catchAsync(async (req, res, next) => {
 
     crime.formattedCreatedAt = createdAtDate.toLocaleString("en-US", options);
   }
+
   res.status(200).render("view-update-crime", {
     title: "Crime Repo - Update Crime Report",
     page: "update",

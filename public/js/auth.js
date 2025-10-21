@@ -32,7 +32,12 @@ export const logout = async () => {
     const res = await axios.post("/api/v1/users/logout", {
       withCredentials: true,
     });
-    if (res.data.status === "Success") location.reload(true);
+    if (res.data.status === "Success") {
+      showAlert("success", "Goodbye!");
+      window.setTimeout(() => {
+        location.assign("/");
+      }, 1500);
+    }
   } catch (err) {
     showAlert("error", "Error logging out! Try again.");
   }
@@ -80,8 +85,6 @@ export const updateReport = async (form, initialData) => {
   }
 
   if (Object.keys(changedData).length > 0) {
-    console.log("Hola backend ", changedData);
-
     try {
       const res = await axios.patch(
         `/api/v1/crimes/crime-update/${reportId}`,

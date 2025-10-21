@@ -1,4 +1,11 @@
 import { initializeCrimeMap } from "./map.js";
+import {
+  auth,
+  logout,
+  forgetPassword,
+  reportCrime,
+  updateReport,
+} from "./auth.js";
 const loginForm = document.getElementById("login-form");
 const logoutBtn = document.getElementById("logout-btn");
 const userSignup = document.getElementById("signup-form");
@@ -7,13 +14,7 @@ const forgotPassword = document.getElementById("forgot-password");
 const forgetPasswordfunc = document.getElementById("forgot-password-func");
 const reportCrimeForm = document.getElementById("report-crime");
 const updateReportForm = document.getElementById("view-update-form");
-import {
-  auth,
-  logout,
-  forgetPassword,
-  reportCrime,
-  updateReport,
-} from "./auth.js";
+
 // --- MAP LOGIC ---
 // 1. Find the map element in the document
 const mapElement = document.getElementById("map");
@@ -49,6 +50,7 @@ if (logoutBtn) {
   logoutBtn.addEventListener("click", async (e) => {
     e.preventDefault();
     await logout();
+    console.log("OUTtttttt");
   });
 }
 if (userSignup) {

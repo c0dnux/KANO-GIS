@@ -87,8 +87,6 @@ exports.getCrime = catchAsync(async (req, res, next) => {
   });
 });
 exports.updateCrime = catchAsync(async (req, res, next) => {
-  console.log("Update", req.body);
-
   const crime = await Crime.findOneAndUpdate(
     { reportId: req.params.reportId },
     { $set: req.body },

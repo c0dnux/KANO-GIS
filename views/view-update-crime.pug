@@ -1,9 +1,11 @@
 extends dashBase
 
-block content 
+block content
+    //- Link to Leaflet CSS for map styling
+    link(rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="")
+
     main(class="flex-1 p-4 sm:p-8")
-        button(id="menu-button" class="lg:hidden mb-4 p-2 rounded-md text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700")
-            span(class="material-symbols-outlined") menu
+        
 
         div(class="max-w-4xl mx-auto")
             // Breadcrumbs
@@ -16,6 +18,11 @@ block content
             div(class="mb-8")
                 h2(class="text-3xl font-bold text-gray-900 dark:text-gray-100") Report ##{crime.reportId}
                 p(class="text-gray-500 dark:text-gray-400 mt-1") Submitted on #{crime.formattedCreatedAt}
+
+            //- New Section for the Map Display
+            div(class="mb-8")
+                h3(class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100") Incident Location
+                div(id="crime-location-map" class="h-96 w-full rounded-lg border border-gray-300 dark:border-gray-700 z-0")
 
             // Report Form
             form(id="view-update-form" data-id=crime.reportId class="bg-background-light dark:bg-background-dark border border-gray-300 dark:border-gray-700 rounded-lg p-6")
@@ -79,4 +86,46 @@ block content
                     button(type="submit" class="bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/90 transition-colors") Update Report
 
     // Axios script
-    script(src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js" integrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA==" crossorigin="anonymous" referrerpolicy="no-referrer")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js" xintegrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA==" crossorigin="anonymous" referrerpolicy="no-referrer")
+
+    //- Leaflet JS for map functionality
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg==" crossorigin="anonymous" referrerpolicy="no-referrer")
+
+    //- Custom script to initialize the map
+    script.
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check if coordinates exist to prevent errors
+            if (!'#{crime.location.coordinates.coordinates[1]}' || !'#{crime.location.coordinates.coordinates[0]}') {
+                console.error('Crime coordinates are missing.');
+                document.getElementById('crime-location-map').innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">Location data not available for this report.</div>';
+                return;
+            }
+
+            // Note: GeoJSON is [longitude, latitude], but Leaflet expects [latitude, longitude]
+            const lat = Number('#{crime.location.coordinates.coordinates[1]}');
+            const lon = Number('#{crime.location.coordinates.coordinates[0]}');
+            const crimeType = `#{crime.crimeType}`;
+            const address = `#{crime.location.address}`;
+
+            // Define a custom icon for the marker
+            const crimeIcon = L.icon({
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/3241/3241517.png', // Placeholder: replace with your actual icon URL
+                iconSize: [38, 38], // size of the icon
+                iconAnchor: [19, 38], // point of the icon which will correspond to marker's location
+                popupAnchor: [0, -38] // point from which the popup should open relative to the iconAnchor
+            });
+
+            // Initialize the map and set its view to the crime's coordinates
+            const crimeLocationMap = L.map('crime-location-map').setView([lat, lon], 16);
+
+            // Add the OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(crimeLocationMap);
+
+            // Add a marker to the map at the crime's location using the custom icon
+            L.marker([lat, lon], { icon: crimeIcon }).addTo(crimeLocationMap)
+                .bindPopup(`<b>${crimeType}</b><br>${address}`)
+                .openPopup();
+        });
+
