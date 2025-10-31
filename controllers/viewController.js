@@ -152,7 +152,7 @@ exports.viewUpdateCrime = catchAsync(async (req, res, next) => {
     const crimeDate = new Date(crime.date);
     const createdAtDate = new Date(crime.createdAt);
     const year = crimeDate.getFullYear();
-    
+
     const month = String(crimeDate.getMonth() + 1).padStart(2, "0");
     const day = String(crimeDate.getDate()).padStart(2, "0");
     const hours = String(crimeDate.getHours()).padStart(2, "0");
@@ -160,7 +160,7 @@ exports.viewUpdateCrime = catchAsync(async (req, res, next) => {
 
     // Construct the string required by <input type="datetime-local">
     crime.formattedDate = `${year}-${month}-${day}T${hours}:${minutes}`;
-  
+
     const options = {
       year: "numeric",
       month: "long",
@@ -177,5 +177,59 @@ exports.viewUpdateCrime = catchAsync(async (req, res, next) => {
     title: "Crime Repo - Update Crime Report",
     page: "update",
     crime,
+  });
+});
+
+exports.settings = catchAsync(async (req, res, next) => {
+  res.status(200).render("settings", {
+    title: "Crime Repo - Settings",
+    page: "settings",
+  });
+});
+exports.dashborad = catchAsync(async (req, res, next) => {
+  // 1. Find all reports submitted by the current user
+  const allReports = await Crime.find({ reportedBy: req.user.id });
+
+  // 2. Calculate statistics
+  const total = allReports.length;
+  const verified = allReports.filter(
+    (report) => report.crimeAuth === "Verified"
+  ).length;
+  const pending = allReports.filter(
+    (report) => report.crimeAuth === "Pending"
+  ).length;
+
+  const stats = {
+    total,
+    verified,
+    pending,
+  };
+
+  // 3. Format the reports for the template
+  const reports = allReports.map((report) => {
+    // Check for a valid date
+    const dateReported = report.createdAt
+      ? new Date(report.createdAt)
+      : null;
+
+    return {
+      id: report.reportId, // Mongoose virtual 'id'
+      type: report.crimeType, // Assuming field name is 'crimeType'
+      // Only format the date if it's valid, otherwise provide a fallback
+      date:
+        dateReported && !isNaN(dateReported)
+          ? new Date(dateReported).toLocaleDateString("en-GB")
+          : "N/A", // Formats to YYYY-MM-DD or shows N/A
+      status: report.crimeAuth,
+    };
+  });
+
+  // 4. Render the dashboard with all the necessary data
+  res.status(200).render("dashboard", {
+    title: "Crime Repo - Dashboard",
+    page: "dashboard",
+    user: req.user, // Pass the whole user object
+    stats: stats,
+    reports: reports,
   });
 });

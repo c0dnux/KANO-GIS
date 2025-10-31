@@ -18,6 +18,8 @@ router.get(
   authController.protect,
   viewController.viewUpdateCrime
 );
+router.get("/settings", authController.protect, viewController.settings);
+router.get("/dashboard", authController.protect, viewController.dashborad);
 //-------ACTIVATE ACCOUNT ------/////
 router.get("/login/:token", viewController.login);
 

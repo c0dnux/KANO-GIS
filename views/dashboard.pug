@@ -1,0 +1,107 @@
+extends dashBase
+
+//- Define the main content block
+block content
+    div(class="mx-auto max-w-7xl")
+        // PageHeading
+        header(class="mb-8")
+            h1(class="text-4xl font-black leading-tight tracking-[-0.033em] text-gray-900 dark:text-white min-w-72") Welcome, #{user ? user.name : 'User'}
+            p(class="text-lg text-gray-500 dark:text-gray-400") #{user ? user.email : 'User Email'}
+            p(class="text-gray-500 dark:text-gray-400 mt-1") Here's a summary of your reporting activity.
+
+        // Stats Section
+        - stats = stats || {} // Default stats object to prevent errors
+        div
+            h2(class="text-[22px] font-bold leading-tight tracking-[-0.015em] text-gray-900 dark:text-white mb-4") Your Activity Summary
+            div(class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3")
+                div(class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800")
+                    p(class="text-base font-medium text-gray-900 dark:text-white") Total Reports Submitted
+                    p(class="tracking-light text-3xl font-bold leading-tight text-teal-600 dark:text-teal-400") #{stats.total || 0}
+                div(class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800")
+                    p(class="text-base font-medium text-gray-900 dark:text-white") Verified Reports
+                    p(class="tracking-light text-3xl font-bold leading-tight text-green-600 dark:text-green-500") #{stats.verified || 0}
+                div(class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800")
+                    p(class="text-base font-medium text-gray-900 dark:text-white") Pending Reports
+                    p(class="tracking-light text-3xl font-bold leading-tight text-yellow-600 dark:text-yellow-500") #{stats.pending || 0}
+
+        // Recent Submissions Section
+        div(class="mt-10")
+            div(class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4")
+                h2(class="text-[22px] font-bold leading-tight tracking-[-0.015em] text-gray-900 dark:text-white") Recent Submissions
+
+                //- Sorting Dropdown
+                div
+                    label(for="status-sort" class="sr-only") Sort by status
+                    select(id="status-sort" name="status-sort" class="form-select block w-full sm:w-auto rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm")
+                        option(value="all") All Statuses
+                        option(value="verified") Verified
+                        option(value="pending") Pending
+                        option(value="rejected") Rejected (Fake)
+
+            div(class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800")
+                div(class="overflow-x-auto")
+                    table(class="min-w-full text-left text-sm")
+                        thead(class="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-700")
+                            tr
+                                th(class="px-6 py-4 font-medium text-gray-900 dark:text-white" scope="col") Report ID
+                                th(class="px-6 py-4 font-medium text-gray-900 dark:text-white" scope="col") Type of Crime
+                                th(class="px-6 py-4 font-medium text-gray-900 dark:text-white" scope="col") Date Submitted
+                                th(class="px-6 py-4 font-medium text-gray-900 dark:text-white" scope="col") Status
+                                th(class="px-6 py-4 font-medium text-gray-900 dark:text-white" scope="col") Action
+                        tbody(id="reports-tbody" class="divide-y divide-gray-200 dark:divide-gray-700")
+                            - reports = reports || [] // Default reports to empty array
+                            if reports.length > 0
+                                each report in reports
+                                    tr(class="hover:bg-gray-50 dark:hover:bg-gray-700/50")
+                                        td(class="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white") #{report.id}
+                                        td(class="whitespace-nowrap px-6 py-4 text-gray-600 dark:text-gray-300") #{report.type}
+                                        td(class="whitespace-nowrap px-6 py-4 text-gray-600 dark:text-gray-300") #{report.date}
+                                        td(class="whitespace-nowrap px-6 py-4")
+                                            if report.status === 'Verified'
+                                                span(class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-800/20 dark:text-green-500") Verified
+                                            else if report.status === 'Pending'
+                                                span(class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-800/20 dark:text-yellow-500") Pending
+                                            else if report.status === 'Fake'
+                                                span(class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-800/20 dark:text-red-500") Rejected
+                                            else
+                                                span(class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-600 dark:text-gray-200") #{report.status}
+                                        td(class="whitespace-nowrap px-6 py-4")
+                                            //- Assuming you have a route like /report/:id
+                                            a(href=`/crime/${report.id}` class="font-medium text-primary hover:underline") View
+                            else
+                                tr
+                                    td(colspan="5" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400")
+                                        | No recent submissions found.
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js" integrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA==" crossorigin="anonymous" referrerpolicy="no-referrer")
+    //- Add script for status sorting
+    script.
+        document.addEventListener('DOMContentLoaded', () => {
+            const sortSelect = document.getElementById('status-sort');
+            const tableBody = document.getElementById('reports-tbody');
+
+            if (sortSelect && tableBody) {
+                sortSelect.addEventListener('change', (e) => {
+                    const selectedStatus = e.target.value;
+                    const rows = tableBody.querySelectorAll('tr');
+
+                    rows.forEach(row => {
+                        // Check if it's the "No recent submissions" row
+                        if (row.querySelector('td[colspan="5"]')) {
+                            return; // Always show this row if it's the only one
+                        }
+
+                        const statusCell = row.querySelector('td:nth-child(4) span');
+                        if (statusCell) {
+                            const rowStatus = statusCell.textContent.toLowerCase().trim();
+
+                            if (selectedStatus === 'all' || rowStatus === selectedStatus) {
+                                row.style.display = ''; // Show row
+                            } else {
+                                row.style.display = 'none'; // Hide row
+                            }
+                        }
+                    });
+                });
+            }
+        });
+

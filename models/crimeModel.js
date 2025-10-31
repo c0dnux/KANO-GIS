@@ -36,7 +36,7 @@ const crimeReportSchema = new mongoose.Schema(
     crimeAuth: {
       type: String,
       enum: ["Pending", "Verified", "Fake"],
-      default: "pending",
+      default: "Pending",
     },
     location: {
       address: { type: String, required: [true, "Address is required"] },
@@ -45,13 +45,13 @@ const crimeReportSchema = new mongoose.Schema(
       state: { type: String, default: "Kano" },
       coordinates: {
         type: {
-          type: String,
+          type: String, // Mongoose type
           enum: ["Point"],
-          default: "Point",
+          required: true, // Set to true if you always have coordinates
         },
         coordinates: {
-          type: [Number], // [longitude, latitude]
-          required: true,
+          type: [Number], // [lng, lat]
+          required: false,
         },
       },
     },
@@ -64,7 +64,7 @@ const crimeReportSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-crimeReportSchema.index({ location: "2dsphere" });
+crimeReportSchema.index({ "location.coordinates": "2dsphere" });
 const CrimeReport = mongoose.model("CrimeReport", crimeReportSchema);
 
 module.exports = CrimeReport;

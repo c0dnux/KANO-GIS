@@ -6,6 +6,8 @@ export const auth = async (type, data) => {
       ? "/api/v1/users/login"
       : type === "signup"
       ? "/api/v1/users/signup"
+      : type === "updatePassword"
+      ? "/api/v1/users/updatePassword"
       : "/api/v1/users/resetPassword";
 
   try {

@@ -92,7 +92,25 @@ if (forgetPasswordfunc) {
     await forgetPassword(email);
   });
 }
+/////////-------------UPDATE PASSWORD FORM LOGIC ---------/////////
+const updatePasswordForm = document.getElementById("password-update-form");
+if (updatePasswordForm) {
+  updatePasswordForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const currentPassword = document.getElementById("current-password").value;
+    const newPassword = document.getElementById("new-password").value;
+    const confirmNewPassword =
+      document.getElementById("confirm-password").value;
+    const data = {
+      currentPassword,
+      newPassword,
+      confirmNewPassword,
+    };
+    console.log(data);
 
+    await auth("updatePassword", data);
+  });
+}
 //////--------REPORT CRIME FORM LOGIC ---------//////
 if (reportCrimeForm) {
   reportCrimeForm.addEventListener("submit", async (e) => {

@@ -16,20 +16,18 @@ exports.signup = catchAsync(async (req, res, next) => {
   const existingUser = await User.findOne({ email: gotten.email }).select(
     "+active"
   );
-
+  ///------- IF SIGNUP REQUEST IS FROM AN EXISTING BUT INACTIVE USER ----///
   if (existingUser) {
     if (existingUser.active) {
       return next(new AppError("Account already exist.", 409)); // 409 Conflict
     }
-    if (gotten.password !== gotten.confirmPassword) {
-      return next(new AppError("Passwords do not match", 400));
-    }
+
     const confirmToken = existingUser.confirmTokenGen();
     existingUser.name = gotten.name;
-    existingUser.newPassword = gotten.password;
-    existingUser.confirmPassword = undefined;
+    existingUser.password = gotten.password;
+    existingUser.confirmPassword = gotten.confirmPassword;
 
-    await existingUser.save({ validateBeforeSave: false });
+    await existingUser.save();
     const url = `${req.protocol}://${req.get("host")}/login/${confirmToken}`;
     await new Email(existingUser, url).sendWelcome();
     return signTokenHandler(
@@ -257,6 +255,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     return next(new AppError("Your current password is wrong", 401));
   }
   user.password = req.body.newPassword;
+  user.confirmPassword = req.body.confirmNewPassword;
   await user.save();
   // const token = signToken(user._id);
   // res

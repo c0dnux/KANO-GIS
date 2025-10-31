@@ -11,9 +11,14 @@ process.on("uncaughtException", (err) => {
 dotenv.config({ path: "./config.env" });
 
 const DB = process.env.DB_LOCAL;
+const DB_ONLINE = process.env.DB_ONLINE_COMPASS.replace(
+  "<db_password>",
+  process.env.DB_PASSWORD
+);
 
-mongoose.connect(DB).then(() => console.log("DB connection successful!"));
-
+mongoose
+  .connect(DB_ONLINE)
+  .then(() => console.log("DB connection successful!"));
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {

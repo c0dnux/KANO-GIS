@@ -18,6 +18,8 @@ exports.reportCrime = catchAsync(async (req, res, next) => {
     }
   );
   console.log(response.data.items[0].position);
+  console.log(response.data);
+
   if (response.data.items.length === 0) {
     return next(new AppError("Unable to geocode the provided address.", 400));
   }
@@ -25,7 +27,7 @@ exports.reportCrime = catchAsync(async (req, res, next) => {
 
   req.body.location.coordinates = {
     type: "Point",
-    coordinates: [parseFloat(lng), parseFloat(lat)], // [longitude, latitude]
+    coordinates: [parseFloat(lng), parseFloat(lat)],
   };
 
   req.body.reportedBy = req.user.id;

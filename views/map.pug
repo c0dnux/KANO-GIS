@@ -58,7 +58,7 @@ html(lang="en")
                         a(class="text-xl font-bold text-gray-900 dark:text-white" href="/") Crime Repo
                     if user
                         nav#main-nav(class="hidden flex flex-col absolute top-full right-4 mt-2 w-48 bg-white dark:bg-slate-800 p-4 rounded-lg shadow-lg border border-primary/20 dark:border-primary/30 space-y-2 z-50 md:flex md:relative md:flex-row md:top-auto md:right-auto md:mt-0 md:w-auto md:bg-transparent md:p-0 md:shadow-none md:border-none md:space-y-0 md:gap-6")
-                            a(href="#" class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors text-gray-600 dark:text-gray-300" aria-label="Report Crime")
+                            a(href="/dashboard" class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors text-gray-600 dark:text-gray-300" aria-label="Report Crime")
                                 span(class="material-symbols-outlined") dashboard
                                 span(class="text-sm font-medium") Dashboard
                             a(href="/report-crime" class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors text-gray-600 dark:text-gray-300" aria-label="Report Crime")
@@ -66,7 +66,7 @@ html(lang="en")
                                 span(class="text-sm font-medium") Report Crime   
                 .flex.items-center.gap-4
                     if user
-                        a(href="#")
+                        a(href="/dashboard")
                             img(src=`/policeman.png`, alt=user.name, class="w-10 h-10 rounded-full object-cover")
                         button#menu-toggle(class="p-2 rounded-full md:hidden hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors")
                             span(class="material-symbols-outlined text-gray-600 dark:text-gray-400") menu
