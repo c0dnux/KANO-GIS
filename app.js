@@ -6,10 +6,7 @@ require("dotenv").config();
 const AppError = require("./utils/appError");
 const userRouter = require("./routes/userRoutes");
 const crimeRouter = require("./routes/crimeRoutes");
-// const categoryRouter = require("./routes/categoryRoutes");
 const viewRouter = require("./routes/viewRoutes");
-// const cartRouter = require("./routes/cartRoutes");
-// const orderRouter = require("./routes/orderRoutes");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const ems = require("express-mongo-sanitize");
@@ -104,8 +101,8 @@ if (process.env.NODE_ENV === "development") {
 
 // Limitter
 const limiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 60 minutes
-  limit: 200, // Limit each IP to 30 requests per `window` (here, per 60 minutes).
+  windowMs: 15 * 60 * 1000, // 60 minutes
+  limit: 100, // Limit each IP to 30 requests per `window` (here, per 60 minutes).
   standardHeaders: "draft-8", // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
   // store: ... , // Redis, Memcached, etc. See below.
