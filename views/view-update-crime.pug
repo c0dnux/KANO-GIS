@@ -52,22 +52,22 @@ block content
                     // Date and Time
                     div
                         label(for="datetime" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Date & Time
-                        input(type="datetime-local" id="date" name="date" value=`${crime.formattedDate}` class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
+                        input(type="datetime-local" id="date" name="date" value=`${crime.formattedDate}` class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary" disabled=(user.role !== 'admin'))
 
                     // Number of Victims
                     div
                         label(for="victims" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Number of Victims
-                        input(type="number" id="victims" name="victims" value=`${crime.victims}` min="0" class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
+                        input(type="number" id="victims" name="victims" value=`${crime.victims}` min="0" class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary" disabled=(user.role !== 'admin'))
 
                     // Description
                     div(class="md:col-span-2")
                         label(for="description" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Description
-                        textarea(id="description" name="description" rows="4" class="form-textarea w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary") #{crime.description}
+                        textarea(id="description" name="description" rows="4" class="form-textarea w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary" disabled=(user.role !== 'admin')) #{crime.description}
 
                     // Report Status
                     div
                         label(for="report-status" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Report Status
-                        select(id="report-status" name="status" class="form-select w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
+                        select(id="report-status" name="status" class="form-select w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary" disabled=(user.role !== 'admin'))
                             option(selected=(crime.status === 'Under Investigation')) Under Investigation
                             option(selected=(crime.status === 'Resolved')) Resolved
                             option(selected=(crime.status === 'Unknown')) Unknown
@@ -75,15 +75,15 @@ block content
                     // Report Authenticity
                     div
                         label(for="report-authenticity" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Report Authenticity
-                        select(id="report-authenticity" name="crimeAuth" class="form-select w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
+                        select(id="report-authenticity" name="crimeAuth" class="form-select w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary" disabled=(user.role !== 'admin'))
                             option(selected=(crime.crimeAuth === 'Pending')) Pending
                             option(selected=(crime.crimeAuth === 'Verified')) Verified
                             option(selected=(crime.crimeAuth === 'Fake')) Fake
 
                 // Actions
-                div(class="mt-8 flex justify-end gap-4")
-                    button(type="button" class="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-bold py-2 px-4 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors") Cancel
-                    button(type="submit" class="bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/90 transition-colors") Update Report
+                if user.role === 'admin'
+                    div(class="mt-8 flex justify-end gap-4")
+                        button(type="submit" class="bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/90 transition-colors") Update Report
 
     // Axios script
     script(src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js" xintegrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA==" crossorigin="anonymous" referrerpolicy="no-referrer")

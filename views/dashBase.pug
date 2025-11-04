@@ -18,7 +18,7 @@ html(lang="en")
       }
 
   body(class="font-display bg-background-light dark:bg-background-dark text-foreground-light dark:text-foreground-dark min-h-screen flex flex-col")
-    
+
     // Header - FULL WIDTH
     header(class="sticky top-0 z-30 w-screen bg-background-light dark:bg-background-dark border-b border-gray-300 dark:border-gray-700 p-4 flex items-center justify-between")
       div(class="flex items-center gap-2")
@@ -59,14 +59,15 @@ html(lang="en")
                 a(class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'update' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
                   span(class="material-symbols-outlined") update
                   span(class="text-sm font-medium") View / Update Report
-            li
-              a(href="/all-crimes" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'all-crimes' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
-                span(class="material-symbols-outlined") all_inclusive
-                span(class="text-sm font-medium") All Reports
-            li
-              a(href="#" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'analytics' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
-                span(class="material-symbols-outlined") analytics
-                span(class="text-sm font-medium") Analytics
+            if user && user.role === 'admin'
+              li
+                a(href="/all-crimes" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'all-crimes' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
+                  span(class="material-symbols-outlined") all_inclusive
+                  span(class="text-sm font-medium") All Reports
+              li
+                a(href="/analytics" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'analytics' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
+                  span(class="material-symbols-outlined") analytics
+                  span(class="text-sm font-medium") Analytics
             li
               a(href="/settings" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'settings' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
                 span(class="material-symbols-outlined") settings
@@ -76,7 +77,7 @@ html(lang="en")
           div(class="flex items-center gap-4")
             div(class="w-10 h-10 rounded-full bg-cover bg-center", style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDO1qaHatVy5a23NK8Z9MSpw07xb26E84F4TNc9fh8h6eWstnW1QxIIRalNqhX6uaEOIGCGt1l6G3fXIpVOKQ-0BM6MezyHj_tmS4BykWiCNwR3HJakI3VorwjGxOw3mAtXx1pNPffrGaHh08FqtS0ntt7sWcvImX505_Ap9CyjtRr9q7dfpu_qubbZw_fEbREWs2mA_MZY2gfB1s-T2oKb0T_moreeL2mVVKk_gd9tuncOQdXCrfnDW0wbKlOlY9S30eHm6XDTD7c");')
             div
-              p(class="text-sm font-medium text-gray-900 dark:text-white") Admin User
+              p(class="text-sm font-medium text-gray-900 dark:text-white") #{user.role === 'admin' ? 'Admin' : 'User'}
               a(id="logout-btn" class="text-xs text-red-500 hover:underline") Logout
 
       // Main Content (Page-Specific)

@@ -1,0 +1,90 @@
+extends dashBase
+
+block content
+    main(class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto")
+        // Filters
+        header(class="flex flex-wrap justify-between items-center gap-4 mb-8")
+            h1(class="text-3xl font-black") Admin Analytics Dashboard
+        // STATS SECTION
+        section(class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8")
+            each stat in stats
+                div(class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark")
+                    div(class="flex justify-between items-center")
+                        p(class="text-sm font-medium")= stat.title
+                        span(class="material-symbols-outlined p-2 rounded-lg bg-" + stat.color + "/10 text-" + stat.color)= stat.icon
+                    p(class="text-3xl font-bold") #{stat.value}
+
+        // CHARTS SECTION
+        section(class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8")
+            // Bar Chart
+            div(class="lg:col-span-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark")
+                h3(class="text-lg font-bold") Crime Reports by Type
+                canvas(id="barChart" class="w-full h-64")
+
+            // Pie Chart
+            div(class="rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark")
+                h3(class="text-lg font-bold") Reports by Status
+                canvas(id="pieChart" class="w-full h-64")
+        // RECENT REPORTS
+        section(class="rounded-xl bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark")
+            div(class="p-6")
+                h3(class="text-lg font-bold mb-4") Recent Crime Reports
+                div(class="overflow-x-auto")
+                    table(class="w-full text-left min-w-[700px] text-sm")
+                        thead(class="bg-background-light dark:bg-background-dark")
+                            tr
+                                th(class="px-6 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider") Report ID
+                                th(class="px-6 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider") Type
+                                th(class="px-6 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider") Location
+                                th(class="px-6 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider") Date
+                                th(class="px-6 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider") Status
+                                th(class="px-6 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider") Action
+                        tbody
+                            each report in recentReports
+                                tr(class="border-b border-border-light dark:border-border-dark")
+                                td(class="px-6 py-3") #{report.id}
+                                td(class="px-6 py-3") #{report.type}
+                                td(class="px-6 py-3") #{report.location}
+                                td(class="px-6 py-3") #{report.date}
+                                td(class="px-6 py-3")
+                                    if report.status === 'Verified'
+                                        span(class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-800/20 dark:text-green-500") Verified
+                                    else if report.status === 'Pending'
+                                        span(class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-800/20 dark:text-yellow-500") Pending
+                                    else if report.status === 'Fake'
+                                        span(class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-800/20 dark:text-red-500") Rejected
+                                    else
+                                        span(class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-600 dark:text-gray-200") #{report.status}
+                                td(class="px-6 py-3")
+                                    a(href=`/crime/${report.id}` class="text-primary hover:underline") View
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js" xintegrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA==" crossorigin="anonymous" referrerpolicy="no-referrer")
+    // Chart.js
+    script(src="https://cdn.jsdelivr.net/npm/chart.js")
+    script.
+        const ctxBar = document.getElementById('barChart');
+        const ctxPie = document.getElementById('pieChart');
+        const ctxLine = document.getElementById('lineChart');
+
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: !{JSON.stringify(crimeTypes)},
+                datasets: [{
+                    label: 'Reports',
+                    data: !{JSON.stringify(crimeCounts)},
+                    backgroundColor: '#3B82F6'
+                }]
+            }
+        });
+
+        new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: ['Verified', 'Pending', 'Fake'],
+                datasets: [{
+                    data: [!{verifiedReports}, !{pendingReports}, !{fakeReports}],
+                    backgroundColor: ['#10B981', '#F59E0B', '#EF4444']
+                }]
+            }
+        });
+

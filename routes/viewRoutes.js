@@ -12,7 +12,12 @@ router.get("/reset-password", viewController.resetPassword);
 router.get("/reset-password/:token", viewController.resetPassword);
 router.get("/forgot-password", viewController.forgotPassword);
 router.get("/report-crime", authController.protect, viewController.reportCrime);
-router.get("/all-crimes", authController.protect, viewController.allCrimes);
+router.get(
+  "/all-crimes",
+  authController.protect,
+  authController.restrictTo("admin"),
+  viewController.allCrimes
+);
 router.get(
   "/crime/:id",
   authController.protect,
@@ -20,6 +25,12 @@ router.get(
 );
 router.get("/settings", authController.protect, viewController.settings);
 router.get("/dashboard", authController.protect, viewController.dashborad);
+router.get(
+  "/analytics",
+  authController.protect,
+  authController.restrictTo("admin"),
+  viewController.analytics
+);
 //-------ACTIVATE ACCOUNT ------/////
 router.get("/login/:token", viewController.login);
 

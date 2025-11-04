@@ -208,9 +208,7 @@ exports.dashborad = catchAsync(async (req, res, next) => {
   // 3. Format the reports for the template
   const reports = allReports.map((report) => {
     // Check for a valid date
-    const dateReported = report.createdAt
-      ? new Date(report.createdAt)
-      : null;
+    const dateReported = report.createdAt ? new Date(report.createdAt) : null;
 
     return {
       id: report.reportId, // Mongoose virtual 'id'
@@ -231,5 +229,94 @@ exports.dashborad = catchAsync(async (req, res, next) => {
     user: req.user, // Pass the whole user object
     stats: stats,
     reports: reports,
+  });
+});
+
+exports.analytics = catchAsync(async (req, res, next) => {
+  // Example data (replace these with real queries)
+  const totalUsers = await User.countDocuments();
+  const activeUsers = await User.countDocuments({ active: true });
+  const totalReports = await Crime.countDocuments();
+  const verifiedReports = await Crime.countDocuments({ crimeAuth: "Verified" });
+  const fakeReports = await Crime.countDocuments({ crimeAuth: "Fake" });
+  const pendingReports = await Crime.countDocuments({ crimeAuth: "Pending" });
+
+  // Group crimes by type for bar chart
+  const crimeStats = await Crime.aggregate([
+    { $group: { _id: "$crimeType", count: { $sum: 1 } } },
+  ]);
+  const crimeTypes = crimeStats.map((c) => c._id);
+  const crimeCounts = crimeStats.map((c) => c.count);
+
+
+
+  // Recent reports table
+  const recentReports = await Crime.find()
+    .sort({ createdAt: -1 })
+    .limit(10)
+    .select("reportId crimeType location createdAt crimeAuth");
+
+  const reportsFormatted = recentReports.map((r) => ({
+    id: r.reportId,
+    type: r.crimeType,
+    location: r.location.address,
+    date: r.createdAt
+      ? new Date(r.createdAt).toLocaleDateString("en-GB")
+      : "N/A",
+    status: r.crimeAuth,
+  }));
+  const stats = [
+    {
+      title: "Total Users",
+      value: totalUsers,
+      icon: "group",
+      color: "primary",
+    },
+    {
+      title: "Active Users",
+      value: activeUsers,
+      icon: "person_check",
+      color: "success",
+    },
+    {
+      title: "Total Crime Reports",
+      value: totalReports,
+      icon: "summarize",
+      color: "primary",
+    },
+    {
+      title: "Verified Reports",
+      value: verifiedReports,
+      icon: "task_alt",
+      color: "success",
+    },
+    {
+      title: "Fake Reports",
+      value: fakeReports,
+      icon: "report",
+      color: "danger",
+    },
+    {
+      title: "Pending Reports",
+      value: pendingReports,
+      icon: "pending",
+      color: "warning",
+    },
+  ];
+
+  // ✅ Inject all data into the dashboard.pug template
+  res.status(200).render("analytics", {
+    title: "Crime Repo - Admin Dashboard",
+    page: "analytics",
+    totalUsers,
+    activeUsers,
+    totalReports,
+    verifiedReports,
+    fakeReports,
+    pendingReports,
+    crimeTypes,
+    crimeCounts,
+    recentReports: reportsFormatted,
+    stats,
   });
 });
