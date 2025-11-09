@@ -60,6 +60,7 @@ const crimeReportSchema = new mongoose.Schema(
     reportedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      select: false,
     },
   },
   { timestamps: true }
