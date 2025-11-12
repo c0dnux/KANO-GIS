@@ -248,8 +248,6 @@ exports.analytics = catchAsync(async (req, res, next) => {
   const crimeTypes = crimeStats.map((c) => c._id);
   const crimeCounts = crimeStats.map((c) => c.count);
 
-
-
   // Recent reports table
   const recentReports = await Crime.find()
     .sort({ createdAt: -1 })
@@ -318,5 +316,78 @@ exports.analytics = catchAsync(async (req, res, next) => {
     crimeCounts,
     recentReports: reportsFormatted,
     stats,
+  });
+});
+exports.users = catchAsync(async (req, res, next) => {
+  const users = await User.find().select("+active");
+  console.log(users);
+
+  res.status(200).render("all_users", {
+    title: "Crime Repo - User Management",
+    page: "users",
+    users,
+  });
+});
+
+exports.userDetails = catchAsync(async (req, res, next) => {
+  const userId = req.params.id;
+  const user = await User.findById(userId).select("+active");
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+  const remainingMs = user.accessStatus.dateOfSuspensionEnd - Date.now();
+  const remainingDays = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
+  const initials = user.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+  const colors = ["FFC107", "3F51B5", "E91E63", "9C27B0", "009688"];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  user.avatar = `https://placehold.co/40x40/${color}/FFFFFF?text=${initials}`;
+
+  // Count crimes for this user
+  const totalCrimes = await Crime.countDocuments({ reportedBy: userId });
+  const verified = await Crime.countDocuments({
+    reportedBy: userId,
+    crimeAuth: "Verified",
+  });
+  const pending = await Crime.countDocuments({
+    reportedBy: userId,
+    crimeAuth: "Pending",
+  });
+  const fake = await Crime.countDocuments({
+    reportedBy: userId,
+    crimeAuth: "Fake",
+  });
+  const investigation = await Crime.countDocuments({
+    reportedBy: userId,
+    status: "Under Investigation",
+  });
+  const resolved = await Crime.countDocuments({
+    reportedBy: userId,
+    status: "Resolved",
+  });
+  const unknown = await Crime.countDocuments({
+    reportedBy: userId,
+    status: "Unknown",
+  });
+  console.log(totalCrimes, verified);
+
+  res.status(200).render("user", {
+    title: `Crime Repo - User: ${user.name}`,
+    page: "users",
+    user,
+    remainingDays,
+    crimeStats: {
+      totalCrimes,
+      verified,
+      pending,
+      fake,
+      investigation,
+      resolved,
+      unknown,
+    },
   });
 });

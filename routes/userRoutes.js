@@ -17,7 +17,6 @@ const limiter = rateLimit({
   },
 });
 
-
 router.post("/signup", authController.signup);
 router.post("/login", limiter, authController.signin);
 router.post("/logout", authController.logout);
@@ -28,5 +27,10 @@ router.post(
   authController.protect,
   authController.updatePassword
 );
-
+router.post(
+  "/suspend/:id",
+  authController.protect,
+  authController.suspentAccount
+);
+router.post("/block/:id", authController.protect, authController.blockAccount);
 module.exports = router;

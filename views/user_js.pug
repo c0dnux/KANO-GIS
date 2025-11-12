@@ -1,0 +1,394 @@
+
+script.
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- MOCK DATA ---
+        const allUsers = !{JSON.stringify(users)};
+
+        // --- STATE VARIABLES ---
+        let filteredUsers = [...allUsers];
+        let currentPage = 1;
+        const itemsPerPage = 10; // You can change this
+        let currentFilters = {
+            search: '',
+            role: 'All',
+            access: 'All'
+        };
+
+        // --- SELECTORS ---
+        const searchInput = document.getElementById('searchInput');
+        const roleFilter = document.getElementById('roleFilter');
+        const accessFilter = document.getElementById('accessFilter');
+        const tableBody = document.getElementById('userTableBody');
+        const paginationContainer = document.getElementById('paginationContainer');
+        const mobilePagination = document.getElementById('mobilePagination');
+        const summaryStart = document.getElementById('summaryStart');
+        const summaryEnd = document.getElementById('summaryEnd');
+        const summaryTotal = document.getElementById('summaryTotal');
+
+        // Modal Selectors
+        const addNewUserButton = document.getElementById('addNewUserButton');
+        const newUserModal = document.getElementById('newUserModal');
+        const newUserForm = document.getElementById('newUserForm');
+        const closeModalButton = document.getElementById('closeModalButton');
+        const modalOverlay = document.getElementById('modalOverlay');
+
+
+        // --- RENDER FUNCTIONS ---
+
+        /**
+        * Renders the table with the provided list of users.
+        * @param {Array} usersToRender - The array of user objects to display.
+        */
+        function renderTable(usersToRender) {
+            tableBody.innerHTML = ''; // Clear existing table rows
+
+            if (usersToRender.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-10 text-gray-500 dark:text-gray-400">
+                            No users found matching your criteria.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            usersToRender.forEach(user => {
+                const row = document.createElement('tr');
+
+                // Role Badge
+                let roleBadge = '';
+                if (user.role === 'admin') {
+                    roleBadge = `<span class="inline-flex rounded-full bg-primary/10 px-2 text-xs font-semibold leading-5 text-primary dark:bg-primary/20 dark:text-blue-300">Admin</span>`;
+                } else {
+                    roleBadge = `<span class="inline-flex rounded-full bg-yellow-100 dark:bg-yellow-900/50 px-2 text-xs font-semibold leading-5 text-yellow-800 dark:text-yellow-300">User</span>`;
+                } 
+
+                // Status Badge
+                const statusBadge = user.active === true ?
+                    `<span class="inline-flex rounded-full bg-green-100 dark:bg-green-900/50 px-2 text-xs font-semibold leading-5 text-green-800 dark:text-green-300">Active</span>` :
+                    `<span class="inline-flex rounded-full bg-red-100 dark:bg-red-900/50 px-2 text-xs font-semibold leading-5 text-red-800 dark:text-red-300">Inactive</span>`;
+
+                // Access Status Badge
+                let accessBadge = '';
+                if (user.accessStatus.status === 'granted') {
+                    accessBadge = `<span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 dark:bg-green-900/50 px-2 py-1 text-xs font-semibold leading-5 text-green-800 dark:text-green-300">
+                        <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Granted</span>`;
+                } else if (user.accessStatus.status === 'suspended') {
+                    accessBadge = `<span class="inline-flex items-center gap-1.5 rounded-full bg-yellow-100 dark:bg-yellow-900/50 px-2 py-1 text-xs font-semibold leading-5 text-yellow-800 dark:text-yellow-300">
+                        <span class="h-1.5 w-1.5 rounded-full bg-yellow-500"></span> Suspended</span>`;
+                } else { // 'Banned'
+                    accessBadge = `<span class="inline-flex items-center gap-1.5 rounded-full bg-red-100 dark:bg-red-900/50 px-2 py-1 text-xs font-semibold leading-5 text-red-800 dark:text-red-300">
+                        <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span> Banned</span>`;
+                }
+                const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                const colors = ['FFC107','3F51B5','E91E63','9C27B0','009688'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                user.avatar = `https://placehold.co/40x40/${color}/FFFFFF?text=${initials}`;
+                row.innerHTML = `
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                        <div class="flex items-center">
+                            <div class="h-10 w-10 flex-shrink-0">
+                                <div class="h-10 w-10 rounded-full bg-cover bg-center" style="background-image: url('${user.avatar}')"></div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="font-medium text-gray-900 dark:text-white">${user.name}</div>
+                                <div class="text-gray-500 dark:text-gray-400">${user.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500 dark:text-gray-400">
+                        ${roleBadge}
+                    </td>
+                    <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500 dark:text-gray-400">
+                        ${statusBadge}
+                    </td>
+                    <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500 dark:text-gray-400">
+                        ${accessBadge}
+                    </td>
+                    <td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <a href="/user/${user._id}" class="rounded border border-gray-300 dark:border-gray-700 px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">Details</a>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        /**
+        * Renders the pagination controls.
+        */
+        function renderPagination() {
+            const totalItems = filteredUsers.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+            paginationContainer.innerHTML = ''; // Clear existing pagination
+            if (totalPages <= 1) {
+                mobilePagination.classList.add('sm:hidden'); // Hide mobile if only one page
+                return;
+            }
+
+            mobilePagination.classList.remove('sm:hidden');
+
+            // --- Mobile Buttons ---
+            const mobilePrev = mobilePagination.querySelector('[data-action="prev"]');
+            const mobileNext = mobilePagination.querySelector('[data-action="next"]');
+            mobilePrev.disabled = (currentPage === 1);
+            mobileNext.disabled = (currentPage === totalPages);
+
+
+            // --- Desktop Buttons ---
+
+            // Previous Button
+            paginationContainer.appendChild(
+                createPaginationButton('prev', '&lt;', currentPage === 1, 'rounded-l-md')
+            );
+
+            // Page Numbers
+            // Simple logic for ellipsis (can be made more complex)
+            const maxPagesToShow = 7; // e.g., 1 ... 4 5 6 ... 10
+            if (totalPages <= maxPagesToShow) {
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationContainer.appendChild(createPaginationButton('page', i, false, '', i === currentPage));
+                }
+            } else {
+                // Logic to add '...'
+                let pages = [];
+                pages.push(createPaginationButton('page', 1, false, '', 1 === currentPage));
+
+                let startPage = Math.max(2, currentPage - 1);
+                let endPage = Math.min(totalPages - 1, currentPage + 1);
+
+                if (currentPage > 3) {
+                    pages.push(createPaginationButton('ellipsis', '...', true));
+                }
+
+                if (currentPage === 3) startPage = 2;
+                if (currentPage === totalPages - 2) endPage = totalPages - 1;
+
+
+                for (let i = startPage; i <= endPage; i++) {
+                    pages.push(createPaginationButton('page', i, false, '', i === currentPage));
+                }
+
+                if (currentPage < totalPages - 2) {
+                    pages.push(createPaginationButton('ellipsis', '...', true));
+                }
+
+                pages.push(createPaginationButton('page', totalPages, false, '', totalPages === currentPage));
+
+                pages.forEach(btn => paginationContainer.appendChild(btn));
+            }
+
+
+            // Next Button
+            paginationContainer.appendChild(
+                createPaginationButton('next', '&gt;', currentPage === totalPages, 'rounded-r-md')
+            );
+        }
+
+        /**
+        * Helper function to create a single pagination button.
+        */
+        function createPaginationButton(action, content, disabled = false, extraClasses = '', isActive = false) {
+            const button = document.createElement('button');
+            button.dataset.action = action;
+            button.dataset.page = (action === 'page') ? content : '';
+            button.innerHTML = action === 'prev' ? `<span class="material-symbols-outlined text-sm">chevron_left</span>` :
+                action === 'next' ? `<span class="material-symbols-outlined text-sm">chevron_right</span>` :
+                content;
+
+            let baseClasses = 'relative inline-flex items-center px-4 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:z-20 focus:outline-offset-0';
+
+            if (disabled || action === 'ellipsis') {
+                button.disabled = true;
+                baseClasses += ' text-gray-400 dark:text-gray-500';
+            } else {
+                baseClasses += ' text-gray-900 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800';
+            }
+
+            if (isActive) {
+                baseClasses = baseClasses.replace('text-gray-900 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800', '');
+                baseClasses += ' pagination-active'; // Custom class for active page
+            }
+
+            if (action === 'prev' || action === 'next') {
+                baseClasses = baseClasses.replace('px-4', 'px-2'); // Arrows are narrower
+            }
+
+            button.className = `${baseClasses} ${extraClasses}`;
+            return button;
+        }
+
+        /**
+        * Updates the "Showing X to Y of Z" summary text.
+        */
+        function renderSummary() {
+            const totalItems = filteredUsers.length;
+            if (totalItems === 0) {
+                summaryStart.textContent = '0';
+                summaryEnd.textContent = '0';
+                summaryTotal.textContent = '0';
+                return;
+            }
+            const start = (currentPage - 1) * itemsPerPage + 1;
+            const end = Math.min(start + itemsPerPage - 1, totalItems);
+
+            summaryStart.textContent = start;
+            summaryEnd.textContent = end;
+            summaryTotal.textContent = totalItems;
+        }
+
+        // --- LOGIC FUNCTIONS ---
+
+        /**
+        * Applies all current filters and re-renders the page.
+        */
+        function applyFiltersAndRender() {
+            const search = currentFilters.search.toLowerCase();
+            const role = currentFilters.role;
+            const access = currentFilters.access;
+
+            filteredUsers = allUsers.filter(user => {
+                const matchesSearch = user.name.toLowerCase().includes(search) ||
+                    user.email.toLowerCase().includes(search) ||
+                    user.role.toLowerCase().includes(search);
+                const matchesRole = (role === 'All' || user.role === role);
+                const matchesAccess = (access === 'All' || user.accessStatus.status === access);
+
+                return matchesSearch && matchesRole && matchesAccess;
+            });
+
+            // Reset to page 1 whenever filters change, unless it's a new user addition
+            if (currentPage !== 1) {
+                currentPage = 1;
+            }
+            displayCurrentPage();
+        }
+
+        /**
+        * Slices the filtered users array and renders the table, pagination, and summary.
+        */
+        function displayCurrentPage() {
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const paginatedUsers = filteredUsers.slice(start, end);
+
+            renderTable(paginatedUsers);
+            renderPagination();
+            renderSummary();
+        }
+
+        /**
+        * Changes the current page and re-renders.
+        * @param {number | 'prev' | 'next'} newPage - The page number or action.
+        */
+        function changePage(newPage) {
+            const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+            if (newPage === 'prev') {
+                currentPage = Math.max(1, currentPage - 1);
+            } else if (newPage === 'next') {
+                currentPage = Math.min(totalPages, currentPage + 1);
+            } else if (typeof newPage === 'number') {
+                currentPage = newPage;
+            }
+
+            displayCurrentPage();
+        }
+
+        // --- EVENT LISTENERS ---
+
+        searchInput.addEventListener('input', (e) => {
+            currentFilters.search = e.target.value;
+            applyFiltersAndRender();
+        });
+
+        roleFilter.addEventListener('change', (e) => {
+            currentFilters.role = e.target.value;
+            applyFiltersAndRender();
+        });
+
+        accessFilter.addEventListener('change', (e) => {
+            currentFilters.access = e.target.value;
+            applyFiltersAndRender();
+        });
+
+        // Event delegation for pagination
+        paginationContainer.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+
+            const action = button.dataset.action;
+            if (action === 'page') {
+                changePage(parseInt(button.dataset.page));
+            } else if (action === 'prev' || action === 'next') {
+                changePage(action);
+            }
+        });
+
+        mobilePagination.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+
+            const action = button.dataset.action;
+            if (action === 'prev' || action === 'next') {
+                changePage(action);
+            }
+        });
+
+        // Modal Listeners
+        addNewUserButton.addEventListener('click', () => {
+            newUserModal.classList.remove('hidden');
+        });
+
+        closeModalButton.addEventListener('click', () => {
+            newUserModal.classList.add('hidden');
+        });
+
+        modalOverlay.addEventListener('click', () => {
+            newUserModal.classList.add('hidden');
+        });
+
+        newUserForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(newUserForm);
+            const name = formData.get('newUserName');
+            const email = formData.get('newUserEmail');
+            const role = formData.get('newUserRole');
+            const accessStatus = formData.get('newUserAccess');
+
+            // Create avatar placeholder from initials
+            const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+            const newUser = {
+                id: allUsers.length + 100, // simple unique id generator
+                name: name,
+                email: email,
+                avatar: `https://placehold.co/40x40/607D8B/FFFFFF?text=${initials}`,
+                role: role,
+                status: 'Active', // Default to Active
+                accessStatus: accessStatus
+            };
+
+            // Add to the main list
+            allUsers.unshift(newUser);
+
+            // Reset filters to show the new user
+            searchInput.value = '';
+            roleFilter.value = 'All';
+            accessFilter.value = 'All';
+            currentFilters = { search: '', role: 'All', access: 'All' };
+
+            // Go to page 1 and re-render
+            currentPage = 1;
+            applyFiltersAndRender();
+
+            // Close modal and reset form
+            newUserModal.classList.add('hidden');
+            newUserForm.reset();
+        });
+
+
+        // --- INITIAL RENDER ---
+        displayCurrentPage();
+    });

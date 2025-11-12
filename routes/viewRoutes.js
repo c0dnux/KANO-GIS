@@ -31,6 +31,18 @@ router.get(
   authController.restrictTo("admin"),
   viewController.analytics
 );
+router.get(
+  "/users",
+  authController.protect,
+  authController.restrictTo("admin"),
+  viewController.users
+);
+router.get(
+  "/user/:id",
+  authController.protect,
+  authController.restrictTo("admin"),
+  viewController.userDetails
+);
 //-------ACTIVATE ACCOUNT ------/////
 router.get("/login/:token", viewController.login);
 

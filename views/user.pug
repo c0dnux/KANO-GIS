@@ -1,0 +1,227 @@
+extends dashBase 
+
+block content
+    div(class="max-w-7xl mx-auto")
+        // Breadcrumbs
+        div(class="flex flex-wrap gap-2 mb-4")
+            a(class="text-slate-500 dark:text-[#92adc9] text-base font-medium leading-normal hover:text-primary" href="#") User Management
+            span(class="text-slate-500 dark:text-[#92adc9] text-base font-medium leading-normal") /
+            span(class="text-slate-800 dark:text-white text-base font-medium leading-normal")=user.name
+
+        // Page Heading
+        div(class="flex flex-wrap justify-between gap-3 mb-8")
+            h1(class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72") #{user.name} - Profile
+
+        // Responsive Grid Layout
+        div(class="grid grid-cols-1 lg:grid-cols-3 gap-8")
+            // Left Column
+            div(class="lg:col-span-1 flex flex-col gap-8")
+                // Profile Header
+                div(class="bg-white dark:bg-[#111a22] p-6 rounded-xl shadow-md")
+                    div(class="flex w-full flex-col gap-4 items-center text-center")
+                        div(class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-32 w-32", style=`background-image: url('${user.avatar}')`, data-alt=`Profile picture of ${user.name}`)
+                        div(class="flex flex-col justify-center")
+                            p(class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]")= user.name
+                            p(class="text-slate-500 dark:text-[#92adc9] text-base font-normal leading-normal")= user.email
+                        div(class="flex gap-3 pt-2 flex-wrap justify-center")
+                            div(class=`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg ${user.active ? 'bg-emerald-500/20' : 'bg-red-500/20'} px-3`)
+                                p(class=`${user.active ? 'text-emerald-500' : 'text-red-500'} text-sm font-medium leading-normal`) Status: #{user.active ? 'Active' : 'Inactive'}
+                            div(class=`flex flex-col py-2 shrink-0 items-center justify-center gap-1 rounded-lg ${user.accessStatus.status === 'granted' ? 'bg-emerald-500/20'  : user.accessStatus.status === 'suspended' ? 'bg-amber-500/20' : 'bg-red-500/20'} px-3`)
+                                p(class=`${user.accessStatus.status === 'granted' ? 'text-emerald-500'  : user.accessStatus.status === 'suspended' ? 'text-amber-500' : 'text-red-500'} text-sm font-medium leading-normal`)
+                                    | Access: #{user.accessStatus.status === 'granted' ? 'Granted' : user.accessStatus.status === 'suspended' ? 'Suspended' : 'Banned'}
+                                if user.accessStatus.status === 'suspended'
+                                    p(class="text-amber-600 text-sm font-medium") Remaining: #{remainingDays} day(s)
+
+                // Admin Actions
+                div(class="bg-white dark:bg-[#111a22] p-6 rounded-xl shadow-md")
+                    h2(class="text-lg font-bold text-slate-900 dark:text-white mb-4") Admin Actions
+                    div(class="flex flex-col gap-4")
+                        // Suspend User Form
+                        div(class="p-4 bg-amber-500/10 rounded-lg")
+                            h3(class="font-semibold text-amber-600 dark:text-amber-400 mb-2") Suspend User
+                            p(class="text-sm text-amber-700 dark:text-amber-300 mb-3") Temporarily revoke user access for a specified number of days.
+                            div(class="flex flex-col sm:flex-row gap-2")
+                                input(id="suspend-days-input" class="w-full sm:w-1/2 flex-grow bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-600 rounded-md text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:ring-primary focus:border-primary" placeholder="Days of Suspension" type="number" min="1")
+                                button(id="open-suspend-modal-btn" class="flex items-center justify-center gap-2 h-10 px-4 bg-amber-500 text-white text-sm font-bold rounded-md hover:bg-amber-600 transition-colors")
+                                    span(class="material-symbols-outlined text-base") timer
+                                    span Suspend
+                        // Block User Form
+                        div(class="p-4 bg-red-500/10 rounded-lg")
+                            h3(class="font-semibold text-red-600 dark:text-red-400 mb-2") Block User
+                            p(class="text-sm text-red-700 dark:text-red-300 mb-3") Permanently block this user from accessing the system. This action is irreversible.
+                            button(id="open-block-modal-btn" class="w-full flex items-center justify-center gap-2 h-10 px-4 bg-red-500 text-white text-sm font-bold rounded-md hover:bg-red-600 transition-colors")
+                                span(class="material-symbols-outlined text-base") block
+                                span Block User
+
+            // Right Column: Stats
+            div(class="lg:col-span-2")
+                div(class="bg-white dark:bg-[#111a22] p-6 rounded-xl shadow-md")
+                    h2(class="text-lg font-bold text-slate-900 dark:text-white mb-6") Reporting Statistics
+                    // Stats Grid
+                    div(class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4")
+                        // Total Crimes
+                        div(class="col-span-1 sm:col-span-2 md:col-span-3 bg-primary/10 dark:bg-primary/20 p-6 rounded-lg flex flex-col justify-between")
+                            div(class="flex justify-between items-start")
+                                p(class="font-medium text-primary dark:text-blue-300") Total Crimes Reported
+                                span(class="material-symbols-outlined text-primary dark:text-blue-300") summarize
+                            p(class="text-5xl font-black text-slate-900 dark:text-white mt-2")=crimeStats.totalCrimes
+
+                        // Verified
+                        div(class="bg-emerald-500/10 p-4 rounded-lg")
+                            div(class="flex justify-between items-start text-emerald-600 dark:text-emerald-400")
+                                p(class="font-medium") Verified
+                                span(class="material-symbols-outlined") verified
+                            p(class="text-3xl font-bold text-slate-900 dark:text-white mt-2")=crimeStats.verified
+
+                        // Pending
+                        div(class="bg-amber-500/10 p-4 rounded-lg")
+                            div(class="flex justify-between items-start text-amber-600 dark:text-amber-400")
+                                p(class="font-medium") Pending
+                                span(class="material-symbols-outlined") pending
+                            p(class="text-3xl font-bold text-slate-900 dark:text-white mt-2")=crimeStats.pending
+
+                        // Fake
+                        div(class="bg-red-500/10 p-4 rounded-lg")
+                            div(class="flex justify-between items-start text-red-600 dark:text-red-400")
+                                p(class="font-medium") Fake
+                                span(class="material-symbols-outlined") report
+                            p(class="text-3xl font-bold text-slate-900 dark:text-white mt-2")=crimeStats.fake
+
+                        // Investigation
+                        div(class="bg-sky-500/10 p-4 rounded-lg")
+                            div(class="flex justify-between items-start text-sky-600 dark:text-sky-400")
+                                p(class="font-medium") Investigation
+                                span(class="material-symbols-outlined") policy
+                            p(class="text-3xl font-bold text-slate-900 dark:text-white mt-2")=crimeStats.investigation
+
+                        // Resolved
+                        div(class="bg-green-500/10 p-4 rounded-lg")
+                            div(class="flex justify-between items-start text-green-600 dark:text-green-400")
+                                p(class="font-medium") Resolved
+                                span(class="material-symbols-outlined") task_alt
+                            p(class="text-3xl font-bold text-slate-900 dark:text-white mt-2")=crimeStats.resolved
+
+                        // Unknown
+                        div(class="bg-slate-500/10 p-4 rounded-lg")
+                            div(class="flex justify-between items-start text-slate-600 dark:text-slate-400")
+                                p(class="font-medium") Unknown
+                                span(class="material-symbols-outlined") help
+                            p(class="text-3xl font-bold text-slate-900 dark:text-white mt-2")=crimeStats.unknown
+    // Modal Backdrop
+    div(id="modal-backdrop" class="fixed inset-0 bg-black/60 z-40 hidden")
+
+    // Suspend Modal
+    div(id="suspend-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md p-6 bg-white dark:bg-[#1f2b38] rounded-xl shadow-lg hidden transition-all")
+        div(class="flex items-start gap-4")
+            div(class="flex-shrink-0 size-12 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center")
+                span(class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-3xl") warning
+            div(class="flex-1")
+                h3(class="text-lg font-bold text-slate-900 dark:text-white") Confirm Suspension
+                p(id="suspend-modal-text" class="text-sm text-slate-600 dark:text-slate-300 mt-1") Are you sure you want to suspend #{user.name}?
+        div(class="flex justify-end gap-3 mt-6")
+            button(id="cancel-suspend-btn" class="h-10 px-4 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-600") Cancel
+            button(id="confirm-suspend-btn" class="h-10 px-4 rounded-md bg-amber-500 text-white text-sm font-bold hover:bg-amber-600") Confirm Suspend
+
+    // Block Modal
+    div(id="block-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md p-6 bg-white dark:bg-[#1f2b38] rounded-xl shadow-lg hidden transition-all")
+        div(class="flex items-start gap-4")
+            div(class="flex-shrink-0 size-12 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center")
+                span(class="material-symbols-outlined text-red-600 dark:text-red-400 text-3xl") block
+            div(class="flex-1")
+                h3(class="text-lg font-bold text-slate-900 dark:text-white") Confirm Block
+                p(class="text-sm text-slate-600 dark:text-slate-300 mt-1") Are you sure you want to permanently block #{user.name}? This action is irreversible.
+        div(class="flex justify-end gap-3 mt-6")
+            button(id="cancel-block-btn" class="h-10 px-4 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-600") Cancel
+            button(id="confirm-block-btn" class="h-10 px-4 rounded-md bg-red-500 text-white text-sm font-bold hover:bg-red-600") Confirm Block
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js" xintegrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA==" crossorigin="anonymous" referrerpolicy="no-referrer")
+    // JavaScript for Modals and Mobile Nav
+    script(type="module").
+        import { showAlert } from '/js/alert.js';
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = !{JSON.stringify(user)};
+            // --- Modal Logic ---
+            const backdrop = document.getElementById('modal-backdrop');
+
+            // Suspend Modal
+            const suspendModal = document.getElementById('suspend-modal');
+            const openSuspendBtn = document.getElementById('open-suspend-modal-btn');
+            const cancelSuspendBtn = document.getElementById('cancel-suspend-btn');
+            const confirmSuspendBtn = document.getElementById('confirm-suspend-btn');
+            const suspendDaysInput = document.getElementById('suspend-days-input');
+            const suspendModalText = document.getElementById('suspend-modal-text');
+
+            openSuspendBtn?.addEventListener('click', () => {
+                const days = suspendDaysInput.value;
+                if (!days || days < 1) {
+                    showAlert("error", "PLease enter valid days");
+                    suspendDaysInput.focus();
+                    suspendDaysInput.classList.add('ring-2', 'ring-red-500');
+                    return;
+                }
+                suspendDaysInput.classList.remove('ring-2', 'ring-red-500');
+                suspendModalText.textContent = `Are you sure you want to suspend ${user.name} for ${days} day(s)?`;
+                backdrop.classList.remove('hidden');
+                suspendModal.classList.remove('hidden');
+            });
+
+            function closeSuspendModal() {
+                backdrop.classList.add('hidden');
+                suspendModal.classList.add('hidden');
+            }
+
+            cancelSuspendBtn?.addEventListener('click', closeSuspendModal);
+            confirmSuspendBtn?.addEventListener('click', async () => {
+                const days = suspendDaysInput.value;
+                closeSuspendModal();
+                try {
+                    const res = await axios.post(`/api/v1/users/suspend/${user._id}`, {days}, {
+                    withCredentials: true,});
+                    if (res.data.status === "Success") {
+                    showAlert("success", res.data.message);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                    }
+                } catch (err) {
+                    showAlert("error", err.response.data.message);
+                }     
+            });
+
+            // Block Modal
+            const blockModal = document.getElementById('block-modal');
+            const openBlockBtn = document.getElementById('open-block-modal-btn');
+            const cancelBlockBtn = document.getElementById('cancel-block-btn');
+            const confirmBlockBtn = document.getElementById('confirm-block-btn');
+
+            openBlockBtn?.addEventListener('click', () => {
+                backdrop.classList.remove('hidden');
+                blockModal.classList.remove('hidden');
+            });
+
+            function closeBlockModal() {
+                backdrop.classList.add('hidden');
+                blockModal.classList.add('hidden');
+            }
+
+            cancelBlockBtn?.addEventListener('click', closeBlockModal);
+            confirmBlockBtn?.addEventListener('click',async () => {
+                closeBlockModal();
+                try {
+                    const res = await axios.post(`/api/v1/users/block/${user._id}`);
+                    if (res.data.status === "Success") {
+                    showAlert("success", res.data.message);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                    }
+                } catch (err) {
+                    showAlert("error", err.response.data.message);
+                }
+            });
+
+            // Close modals when clicking the backdrop
+            backdrop?.addEventListener('click', () => {
+                closeSuspendModal();
+                closeBlockModal();
+            });
+        });

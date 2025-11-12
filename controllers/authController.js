@@ -122,6 +122,22 @@ exports.protect = catchAsync(async (req, res, next) => {
       new AppError("The user belonging to this token no longer exists", 401)
     );
   }
+  /////----- Check if user access is suspended or banned ----/////
+  if (userExist.accessStatus.status === "banned") {
+    return next(new AppError("User Have been banned.", 401));
+  }
+  if (
+    userExist.accessStatus.status === "suspended" &&
+    userExist.accessStatus.dateOfSuspensionEnd > Date.now()
+  ) {
+    const diffMillisecs =
+      userExist.accessStatus.dateOfSuspensionEnd - Date.now();
+    const diffDays = Math.ceil(diffMillisecs / (1000 * 60 * 60 * 24));
+    return next(
+      new AppError(`User Suspended. Try again in ${diffDays} day(s).`, 401)
+    );
+  }
+
   //Check if user has changed password after Token was issued
   const passWordChanged = userExist.passwordChangedAfter(decoded.iat);
 
@@ -262,4 +278,42 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   //   .status(200)
   //   .json({ status: "Success", message: "Password updated", token });
   signTokenHandler(200, "Password updated", res, user);
+});
+
+exports.suspentAccount = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new AppError("No user with the given ID", 404));
+  }
+  if (
+    user.accessStatus.dateOfSuspensionEnd &&
+    user.accessStatus.dateOfSuspensionEnd.getTime() > Date.now()
+  ) {
+    return next(new AppError("User already suspended", 403));
+  }
+
+  const { days } = req.body;
+  const daysNumber = Number(days);
+  user.accessStatus.status = "suspended";
+  const suspensionEndDate = new Date();
+
+  suspensionEndDate.setDate(suspensionEndDate.getDate() + daysNumber);
+
+  user.accessStatus.dateOfSuspensionEnd = suspensionEndDate;
+  await user.save({ validateBeforeSave: false });
+  res.status(200).json({ status: "Success", message: "User Suspended" });
+});
+
+exports.blockAccount = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new AppError("No user with the given ID", 404));
+  }
+  if (user.accessStatus.status === "banned") {
+    return next(new AppError("User already banned", 403));
+  }
+  user.accessStatus.status = "banned";
+  user.accessStatus.dateOfSuspensionEnd = null;
+  await user.save({ validateBeforeSave: false });
+  res.status(200).json({ status: "Success", message: "User Blocked" });
 });

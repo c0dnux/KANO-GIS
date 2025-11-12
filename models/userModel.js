@@ -35,6 +35,21 @@ const userSchema = new Schema({
       message: "Passwords do not match",
     },
   },
+  accessStatus: {
+    status: {
+      type: String,
+      enum: ["granted", "suspended", "banned"],
+      default: "granted",
+    },
+    dateOfSuspensionEnd: {
+      type: Date, // null if not suspended or banned
+      required: function () {
+        // require a date only if status is 'suspended'
+        return this.accessStatus?.status === "suspended";
+      },
+      default: null,
+    },
+  },
   passwordChangedAt: Date,
   confirmToken: String,
   confirmTokenExpires: String,
