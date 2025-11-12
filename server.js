@@ -17,7 +17,7 @@ const DB_ONLINE = process.env.DB_ONLINE_COMPASS.replace(
 );
 
 mongoose
-  .connect(DB)
+  .connect(DB_ONLINE)
   .then(() => console.log("DB connection successful!"));
 
 const port = process.env.PORT || 3000;
