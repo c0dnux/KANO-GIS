@@ -30,7 +30,19 @@ router.post(
 router.post(
   "/suspend/:id",
   authController.protect,
+  authController.restrictTo("admin"),
   authController.suspentAccount
 );
-router.post("/block/:id", authController.protect, authController.blockAccount);
+router.post(
+  "/block/:id",
+  authController.protect,
+  authController.restrictTo("admin"),
+  authController.blockAccount
+);
+router.post(
+  "/create_user",
+  authController.protect,
+  authController.restrictTo("admin"),
+  authController.createUser
+);
 module.exports = router;

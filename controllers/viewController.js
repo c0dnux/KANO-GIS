@@ -331,13 +331,13 @@ exports.users = catchAsync(async (req, res, next) => {
 
 exports.userDetails = catchAsync(async (req, res, next) => {
   const userId = req.params.id;
-  const user = await User.findById(userId).select("+active");
-  if (!user) {
+  const userDetails = await User.findById(userId).select("+active");
+  if (!userDetails) {
     return next(new AppError("User not found", 404));
   }
-  const remainingMs = user.accessStatus.dateOfSuspensionEnd - Date.now();
+  const remainingMs = userDetails.accessStatus.dateOfSuspensionEnd - Date.now();
   const remainingDays = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
-  const initials = user.name
+  const initials = userDetails.name
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -345,7 +345,7 @@ exports.userDetails = catchAsync(async (req, res, next) => {
     .toUpperCase();
   const colors = ["FFC107", "3F51B5", "E91E63", "9C27B0", "009688"];
   const color = colors[Math.floor(Math.random() * colors.length)];
-  user.avatar = `https://placehold.co/40x40/${color}/FFFFFF?text=${initials}`;
+  userDetails.avatar = `https://placehold.co/40x40/${color}/FFFFFF?text=${initials}`;
 
   // Count crimes for this user
   const totalCrimes = await Crime.countDocuments({ reportedBy: userId });
@@ -376,9 +376,9 @@ exports.userDetails = catchAsync(async (req, res, next) => {
   console.log(totalCrimes, verified);
 
   res.status(200).render("user", {
-    title: `Crime Repo - User: ${user.name}`,
-    page: "users",
-    user,
+    title: `Crime Repo - User: ${userDetails.name}`,
+    page: "user",
+    userDetails,
     remainingDays,
     crimeStats: {
       totalCrimes,

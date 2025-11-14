@@ -1,5 +1,6 @@
 
-script.
+script(type="module").
+    import { showAlert } from '/js/alert.js';
     document.addEventListener('DOMContentLoaded', () => {
         // --- MOCK DATA ---
         const allUsers = !{JSON.stringify(users)};
@@ -349,43 +350,46 @@ script.
             newUserModal.classList.add('hidden');
         });
 
-        newUserForm.addEventListener('submit', (e) => {
+        newUserForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(newUserForm);
             const name = formData.get('newUserName');
             const email = formData.get('newUserEmail');
             const role = formData.get('newUserRole');
-            const accessStatus = formData.get('newUserAccess');
+            const newUser={
+                name,
+                email,
+                role
+            }
+            try {
+                const res = await axios.post(`/api/v1/users/create_user`, {newUser}, {
+                withCredentials: true,});
+                if (res.data.status === "Success") {
+                const user = res.data.data.user;
 
-            // Create avatar placeholder from initials
-            const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                // Add to the main list
+                allUsers.unshift(user);
 
-            const newUser = {
-                id: allUsers.length + 100, // simple unique id generator
-                name: name,
-                email: email,
-                avatar: `https://placehold.co/40x40/607D8B/FFFFFF?text=${initials}`,
-                role: role,
-                status: 'Active', // Default to Active
-                accessStatus: accessStatus
-            };
+                // Reset filters to show the new user
+                searchInput.value = '';
+                roleFilter.value = 'All';
+                accessFilter.value = 'All';
+                currentFilters = { search: '', role: 'All', access: 'All' };
 
-            // Add to the main list
-            allUsers.unshift(newUser);
+                // Go to page 1 and re-render
+                currentPage = 1;
+                applyFiltersAndRender();
 
-            // Reset filters to show the new user
-            searchInput.value = '';
-            roleFilter.value = 'All';
-            accessFilter.value = 'All';
-            currentFilters = { search: '', role: 'All', access: 'All' };
+                // Close modal and reset form
+                newUserModal.classList.add('hidden');
+                newUserForm.reset();
+                showAlert("success", res.data.message);
 
-            // Go to page 1 and re-render
-            currentPage = 1;
-            applyFiltersAndRender();
-
-            // Close modal and reset form
-            newUserModal.classList.add('hidden');
-            newUserForm.reset();
+                }
+                } catch (err) {
+                    console.log(err);
+                    showAlert("error", err.response.data.message);
+                }
         });
 
 

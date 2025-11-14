@@ -39,7 +39,7 @@ const userSchema = new Schema({
     status: {
       type: String,
       enum: ["granted", "suspended", "banned"],
-      default: "granted",
+      default: "banned",
     },
     dateOfSuspensionEnd: {
       type: Date, // null if not suspended or banned

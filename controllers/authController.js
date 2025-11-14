@@ -65,6 +65,7 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
   user.confirmToken = undefined;
   user.confirmTokenExpires = undefined;
   user.active = true;
+  user.accessStatus.status = "granted";
   await user.save({ validateBeforeSave: false });
 
   // const token = signToken(user._id);
@@ -122,6 +123,7 @@ exports.protect = catchAsync(async (req, res, next) => {
       new AppError("The user belonging to this token no longer exists", 401)
     );
   }
+
   /////----- Check if user access is suspended or banned ----/////
   if (userExist.accessStatus.status === "banned") {
     return next(new AppError("User Have been banned.", 401));
@@ -316,4 +318,19 @@ exports.blockAccount = catchAsync(async (req, res, next) => {
   user.accessStatus.dateOfSuspensionEnd = null;
   await user.save({ validateBeforeSave: false });
   res.status(200).json({ status: "Success", message: "User Blocked" });
+});
+
+exports.createUser = catchAsync(async (req, res, next) => {
+  const { newUser } = req.body;
+  newUser.password = "00000000";
+  newUser.confirmPassword = "00000000";
+  newUser.active = true;
+  newUser.accessStatus = { status: "granted" };
+  const user = new User(newUser);
+  await user.save();
+  user.password = undefined;
+  user.passwordChangedAt = undefined;
+  res
+    .status(201)
+    .json({ status: "Success", data: { user }, message: "User Created" });
 });

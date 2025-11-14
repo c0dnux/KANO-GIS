@@ -6,11 +6,11 @@ block content
         div(class="flex flex-wrap gap-2 mb-4")
             a(class="text-slate-500 dark:text-[#92adc9] text-base font-medium leading-normal hover:text-primary" href="#") User Management
             span(class="text-slate-500 dark:text-[#92adc9] text-base font-medium leading-normal") /
-            span(class="text-slate-800 dark:text-white text-base font-medium leading-normal")=user.name
+            span(class="text-slate-800 dark:text-white text-base font-medium leading-normal")=userDetails.name
 
         // Page Heading
         div(class="flex flex-wrap justify-between gap-3 mb-8")
-            h1(class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72") #{user.name} - Profile
+            h1(class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72") #{userDetails.name} - Profile
 
         // Responsive Grid Layout
         div(class="grid grid-cols-1 lg:grid-cols-3 gap-8")
@@ -19,17 +19,17 @@ block content
                 // Profile Header
                 div(class="bg-white dark:bg-[#111a22] p-6 rounded-xl shadow-md")
                     div(class="flex w-full flex-col gap-4 items-center text-center")
-                        div(class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-32 w-32", style=`background-image: url('${user.avatar}')`, data-alt=`Profile picture of ${user.name}`)
+                        div(class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-32 w-32", style=`background-image: url('${userDetails.avatar}')`, data-alt=`Profile picture of ${userDetails.name}`)
                         div(class="flex flex-col justify-center")
-                            p(class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]")= user.name
-                            p(class="text-slate-500 dark:text-[#92adc9] text-base font-normal leading-normal")= user.email
+                            p(class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]")= userDetails.name
+                            p(class="text-slate-500 dark:text-[#92adc9] text-base font-normal leading-normal")= userDetails.email
                         div(class="flex gap-3 pt-2 flex-wrap justify-center")
-                            div(class=`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg ${user.active ? 'bg-emerald-500/20' : 'bg-red-500/20'} px-3`)
-                                p(class=`${user.active ? 'text-emerald-500' : 'text-red-500'} text-sm font-medium leading-normal`) Status: #{user.active ? 'Active' : 'Inactive'}
-                            div(class=`flex flex-col py-2 shrink-0 items-center justify-center gap-1 rounded-lg ${user.accessStatus.status === 'granted' ? 'bg-emerald-500/20'  : user.accessStatus.status === 'suspended' ? 'bg-amber-500/20' : 'bg-red-500/20'} px-3`)
-                                p(class=`${user.accessStatus.status === 'granted' ? 'text-emerald-500'  : user.accessStatus.status === 'suspended' ? 'text-amber-500' : 'text-red-500'} text-sm font-medium leading-normal`)
-                                    | Access: #{user.accessStatus.status === 'granted' ? 'Granted' : user.accessStatus.status === 'suspended' ? 'Suspended' : 'Banned'}
-                                if user.accessStatus.status === 'suspended'
+                            div(class=`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg ${userDetails.active ? 'bg-emerald-500/20' : 'bg-red-500/20'} px-3`)
+                                p(class=`${userDetails.active ? 'text-emerald-500' : 'text-red-500'} text-sm font-medium leading-normal`) Status: #{userDetails.active ? 'Active' : 'Inactive'}
+                            div(class=`flex flex-col py-2 shrink-0 items-center justify-center gap-1 rounded-lg ${userDetails.accessStatus.status === 'granted' ? 'bg-emerald-500/20'  : userDetails.accessStatus.status === 'suspended' ? 'bg-amber-500/20' : 'bg-red-500/20'} px-3`)
+                                p(class=`${userDetails.accessStatus.status === 'granted' ? 'text-emerald-500'  : userDetails.accessStatus.status === 'suspended' ? 'text-amber-500' : 'text-red-500'} text-sm font-medium leading-normal`)
+                                    | Access: #{userDetails.accessStatus.status === 'granted' ? 'Granted' : userDetails.accessStatus.status === 'suspended' ? 'Suspended' : 'Banned'}
+                                if userDetails.accessStatus.status === 'suspended'
                                     p(class="text-amber-600 text-sm font-medium") Remaining: #{remainingDays} day(s)
 
                 // Admin Actions
@@ -117,7 +117,7 @@ block content
                 span(class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-3xl") warning
             div(class="flex-1")
                 h3(class="text-lg font-bold text-slate-900 dark:text-white") Confirm Suspension
-                p(id="suspend-modal-text" class="text-sm text-slate-600 dark:text-slate-300 mt-1") Are you sure you want to suspend #{user.name}?
+                p(id="suspend-modal-text" class="text-sm text-slate-600 dark:text-slate-300 mt-1") Are you sure you want to suspend #{userDetails.name}?
         div(class="flex justify-end gap-3 mt-6")
             button(id="cancel-suspend-btn" class="h-10 px-4 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-600") Cancel
             button(id="confirm-suspend-btn" class="h-10 px-4 rounded-md bg-amber-500 text-white text-sm font-bold hover:bg-amber-600") Confirm Suspend
@@ -138,7 +138,7 @@ block content
     script(type="module").
         import { showAlert } from '/js/alert.js';
         document.addEventListener('DOMContentLoaded', () => {
-            const user = !{JSON.stringify(user)};
+            const user = !{JSON.stringify(userDetails)};
             // --- Modal Logic ---
             const backdrop = document.getElementById('modal-backdrop');
 
