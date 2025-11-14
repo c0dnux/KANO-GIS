@@ -16,6 +16,7 @@ const cookieParser = require("cookie-parser");
 const hpp = require("hpp");
 const morgan = require("morgan");
 //            Global MiddleWares
+app.set('trust proxy', 1);
 //////CORS
 app.use(cors({
   origin: "http://localhost:3000", // or your frontend domain
