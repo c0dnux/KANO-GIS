@@ -79,7 +79,11 @@ html(lang="en")
 
         div(class="p-4 border-t border-gray-200 dark:border-gray-700")
           div(class="flex items-center gap-4")
-            div(class="w-10 h-10 rounded-full bg-cover bg-center", style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDO1qaHatVy5a23NK8Z9MSpw07xb26E84F4TNc9fh8h6eWstnW1QxIIRalNqhX6uaEOIGCGt1l6G3fXIpVOKQ-0BM6MezyHj_tmS4BykWiCNwR3HJakI3VorwjGxOw3mAtXx1pNPffrGaHh08FqtS0ntt7sWcvImX505_Ap9CyjtRr9q7dfpu_qubbZw_fEbREWs2mA_MZY2gfB1s-T2oKb0T_moreeL2mVVKk_gd9tuncOQdXCrfnDW0wbKlOlY9S30eHm6XDTD7c");')
+            -const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            - const colors = ["FFC107", "3F51B5", "E91E63", "9C27B0", "009688"];
+            - const color = colors[Math.floor(Math.random() * colors.length)];
+            - user.avatar = `https://placehold.co/40x40/${color}/FFFFFF?text=${initials}`;
+            div(class="h-10 w-10 rounded-full bg-cover bg-center", style=`background-image: url('${user.avatar}')`)
             div
               p(class="text-sm font-medium text-gray-900 dark:text-white") #{user.role === 'admin' ? 'Admin' : 'User'}
               a(id="logout-btn" class="text-xs text-red-500 hover:underline") Logout

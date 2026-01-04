@@ -105,3 +105,34 @@ export const updateReport = async (form, initialData) => {
     showAlert("error", "No changes made.");
   }
 };
+
+export const copyApiLink = () => {
+  const apiLink = window.location.origin + "/api/v1/crimes/allCrimes";
+
+  const btnText = document.getElementById("btn-copy-text");
+  const btnIcon = document.querySelector(
+    "#btn-copy-api span.material-symbols-outlined"
+  );
+  const originalIcon = "link";
+
+  if (!btnText || !btnIcon) return;
+
+  navigator.clipboard
+    .writeText(apiLink)
+    .then(() => {
+      btnText.textContent = "Copied!";
+      btnIcon.textContent = "check";
+      btnIcon.classList.remove("text-gray-700", "dark:text-gray-200");
+      btnIcon.classList.add("text-green-600", "dark:text-green-400");
+
+      setTimeout(() => {
+        btnText.textContent = "Copy API";
+        btnIcon.textContent = originalIcon;
+        btnIcon.classList.remove("text-green-600", "dark:text-green-400");
+        btnIcon.classList.add("text-gray-700", "dark:text-gray-200");
+      }, 2000);
+    })
+    .catch((err) => {
+      showAlert("error", err.message);
+    });
+};

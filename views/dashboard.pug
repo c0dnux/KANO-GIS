@@ -15,29 +15,63 @@ block content
             h2(class="text-[22px] font-bold leading-tight tracking-[-0.015em] text-gray-900 dark:text-white mb-4") Your Activity Summary
             div(class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3")
                 div(class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800")
-                    p(class="text-base font-medium text-gray-900 dark:text-white") Total Reports Submitted
+                    //- Title with icon inline
+                    div(class="flex items-center gap-2")
+                        p(class="text-base font-medium text-gray-900 dark:text-white") Total Reports Submitted
+                        span(class="material-symbols-outlined text-teal-600 dark:text-teal-400") done_all
+                    //- Value
                     p(class="tracking-light text-3xl font-bold leading-tight text-teal-600 dark:text-teal-400") #{stats.total || 0}
+                // Verified Reports
                 div(class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800")
-                    p(class="text-base font-medium text-gray-900 dark:text-white") Verified Reports
+                    // Title with icon inline
+                    div(class="flex items-center gap-2")                        
+                        p(class="text-base font-medium text-gray-900 dark:text-white") Verified Reports
+                        span(class="material-symbols-outlined text-green-600 dark:text-green-500") check_circle
+                    // Value
                     p(class="tracking-light text-3xl font-bold leading-tight text-green-600 dark:text-green-500") #{stats.verified || 0}
-                div(class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800")
-                    p(class="text-base font-medium text-gray-900 dark:text-white") Pending Reports
-                    p(class="tracking-light text-3xl font-bold leading-tight text-yellow-600 dark:text-yellow-500") #{stats.pending || 0}
 
+                // Pending Reports
+                div(class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800")
+                    // Title with icon inline
+                    div(class="flex items-center gap-2")
+                        p(class="text-base font-medium text-gray-900 dark:text-white") Pending Reports
+                        span(class="material-symbols-outlined text-yellow-600 dark:text-yellow-500") hourglass_top
+                    // Value
+                    p(class="tracking-light text-3xl font-bold leading-tight text-yellow-600 dark:text-yellow-500") #{stats.pending || 0}
+        // Recent Submissions Section
         // Recent Submissions Section
         div(class="mt-10")
-            div(class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4")
+            //- CONTROL BAR: Flex container for Title and Actions
+            div(class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4")
                 h2(class="text-[22px] font-bold leading-tight tracking-[-0.015em] text-gray-900 dark:text-white") Recent Submissions
+                
+                //- Action Group (Sort + Admin Tools)
+                div(class="flex flex-wrap items-center gap-3 w-full md:w-auto")
+                    
+                    //- Sorting Dropdown (Moved here to sit alongside buttons)
+                    div(class="relative")
+                        select(id="status-sort" name="status-sort" class="form-select block w-full rounded-lg border-gray-300 bg-white py-2 pl-3 pr-10 text-sm text-gray-900 focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400")
+                            option(value="all") All Statuses
+                            option(value="verified") Verified
+                            option(value="pending") Pending
+                            option(value="rejected") Rejected
+                    
+                    //- Admin Actions
+                    if user && user.role === 'admin'
+                        //- Divider (Visual separation)
+                        div(class="hidden md:block h-8 w-px bg-gray-200 dark:bg-gray-700 mx-1")
 
-                //- Sorting Dropdown
-                div
-                    label(for="status-sort" class="sr-only") Sort by status
-                    select(id="status-sort" name="status-sort" class="form-select block w-full sm:w-auto rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm")
-                        option(value="all") All Statuses
-                        option(value="verified") Verified
-                        option(value="pending") Pending
-                        option(value="rejected") Rejected (Fake)
+                        //- Copy API Link Button
+                        button(id="btn-copy-api" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 transition-all")
+                            span(class="material-symbols-outlined text-[20px]") link
+                            span(id="btn-copy-text") Copy API
+                        
+                        //- Download CSV Button
+                        a(href="/api/v1/crimes/download-crime-report" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-sm font-medium text-white shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all") 
+                            span(class="material-symbols-outlined text-[20px]") download
+                            span Download CSV
 
+         
             div(class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800")
                 div(class="overflow-x-auto")
                     table(class="min-w-full text-left text-sm")

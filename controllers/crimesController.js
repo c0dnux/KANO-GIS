@@ -4,9 +4,9 @@ const catchAsync = require("./../utils/catchAsync");
 const axios = require("axios");
 const AppError = require("../utils/appError");
 const UpdateLog = require("../models/update_log_model");
+const ExcelJS = require("exceljs");
 const { set } = require("mongoose");
 exports.reportCrime = catchAsync(async (req, res, next) => {
-  console.log("BAckend", req.body);
   const address = `${req.body.location.address} ${req.body.location.city} ${req.body.location.localGovernment}, ${req.body.location.state}, Nigeria`;
 
   const response = await axios.get(
@@ -18,8 +18,6 @@ exports.reportCrime = catchAsync(async (req, res, next) => {
       },
     }
   );
-  console.log(response.data.items[0].position);
-  console.log(response.data);
 
   if (response.data.items.length === 0) {
     return next(new AppError("Unable to geocode the provided address.", 400));
@@ -34,7 +32,7 @@ exports.reportCrime = catchAsync(async (req, res, next) => {
   req.body.reportedBy = req.user.id;
   /*---------------CHECKING FOR DUPLICATE --------------------*/
   const incidentDate = new Date(req.body.date);
-  const windowMinutes = 120;
+  const windowMinutes = 120; // 2 hours
   const minDate = new Date(incidentDate.getTime() - windowMinutes * 60 * 1000);
   const maxDate = new Date(incidentDate.getTime() + windowMinutes * 60 * 1000);
 
@@ -45,6 +43,7 @@ exports.reportCrime = catchAsync(async (req, res, next) => {
   const maybeDuplicate = await Crime.findOne({
     crimeType: req.body.crimeType,
     date: { $gte: minDate, $lte: maxDate },
+    victims: req.body.victims,
     "location.coordinates": {
       $geoWithin: {
         $centerSphere: [
@@ -122,4 +121,70 @@ exports.updateCrime = catchAsync(async (req, res, next) => {
     status: "Success",
     message: "Crime updated successfully",
   });
+});
+
+exports.downloadCrimeReport = catchAsync(async (req, res, next) => {
+  const reports = await Crime.find().lean();
+
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("Crime Reports");
+
+  // Columns structure
+  sheet.columns = [
+    { header: "S/N", key: "sn", width: 10 },
+    { header: "Report ID", key: "reportId", width: 20 },
+    { header: "Crime Type", key: "crimeType", width: 20 },
+    { header: "Description", key: "description", width: 40 },
+    { header: "Date", key: "date", width: 20 },
+    { header: "Status", key: "status", width: 20 },
+    { header: "Crime Auth", key: "crimeAuth", width: 20 },
+    { header: "Address", key: "address", width: 30 },
+    { header: "City", key: "city", width: 20 },
+    { header: "LGA", key: "localGovernment", width: 20 },
+    { header: "State", key: "state", width: 15 },
+    { header: "Coordinates (lng, lat)", key: "coordinates", width: 25 },
+    { header: "Victims", key: "victims", width: 10 },
+    { header: "Created At", key: "createdAt", width: 20 },
+    { header: "Updated At", key: "updatedAt", width: 20 },
+  ];
+
+  // Add rows
+  reports.forEach((r, i) => {
+    sheet.addRow({
+      sn: i + 1,
+      reportId: r.reportId,
+      crimeType: r.crimeType,
+      description: r.description,
+      date: r.date ? r.date.toISOString().split("T")[0] : "",
+      status: r.status,
+      crimeAuth: r.crimeAuth,
+      address: r.location?.address || "",
+      city: r.location?.city || "",
+      localGovernment: r.location?.localGovernment || "",
+      state: r.location?.state || "",
+      coordinates: r.location?.coordinates?.coordinates
+        ? `${r.location.coordinates.coordinates[0]}, ${r.location.coordinates.coordinates[1]}`
+        : "",
+      victims: r.victims || 0,
+      createdAt: r.createdAt ? r.createdAt.toISOString().split("T")[0] : "",
+      updatedAt: r.updatedAt ? r.updatedAt.toISOString().split("T")[0] : "",
+    });
+  });
+
+  // Style the header row
+  const header = sheet.getRow(1);
+  header.font = { bold: true };
+
+  // Send to browser
+  res.setHeader(
+    "Content-Type",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  );
+  res.setHeader(
+    "Content-Disposition",
+    'attachment; filename="crime_reports.xlsx"'
+  );
+
+  await workbook.xlsx.write(res);
+  res.end();
 });

@@ -16,7 +16,7 @@ const limiter = rateLimit({
     );
   },
 });
-
+  
 router.post("/signup", authController.signup);
 router.post("/login", limiter, authController.signin);
 router.post("/logout", authController.logout);

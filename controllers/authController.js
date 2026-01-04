@@ -74,7 +74,6 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
 });
 exports.signin = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-  console.log(email, password);
 
   if (!email || !password) {
     return next(new AppError("Provide email and password", 400));
@@ -275,6 +274,12 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   user.password = req.body.newPassword;
   user.confirmPassword = req.body.confirmNewPassword;
   await user.save();
+  await UpdateLog.create({
+    updateType: "User",
+    recordId: user.id,
+    updatedFields: ["Password"],
+    updatedBy: req.user.id,
+  });
   // const token = signToken(user._id);
   // res
   //   .status(200)
@@ -303,6 +308,14 @@ exports.suspentAccount = catchAsync(async (req, res, next) => {
 
   user.accessStatus.dateOfSuspensionEnd = suspensionEndDate;
   await user.save({ validateBeforeSave: false });
+  // Log the update
+  await UpdateLog.create({
+    updateType: "User",
+    recordId: user.id,
+    updatedFields: ["Access suspended", " Suspension end date"],
+    updatedBy: req.user.id, // assuming you have authentication
+  });
+
   res.status(200).json({ status: "Success", message: "User Suspended" });
 });
 
@@ -317,6 +330,13 @@ exports.blockAccount = catchAsync(async (req, res, next) => {
   user.accessStatus.status = "banned";
   user.accessStatus.dateOfSuspensionEnd = null;
   await user.save({ validateBeforeSave: false });
+  // Log the update
+  await UpdateLog.create({
+    updateType: "User",
+    recordId: user.id,
+    updatedFields: ["Access Blocked"],
+    updatedBy: req.user.id, // assuming you have authentication
+  });
   res.status(200).json({ status: "Success", message: "User Blocked" });
 });
 

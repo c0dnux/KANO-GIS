@@ -1,5 +1,6 @@
 import { initializeCrimeMap } from "./map.js";
 import {
+  copyApiLink,
   auth,
   logout,
   forgetPassword,
@@ -160,4 +161,9 @@ if (updateReportForm) {
     // 2. Pass both the form AND the initial data to your function.
     updateReport(updateReportForm, initialData);
   });
+}
+
+const btnText = document.getElementById("btn-copy-text");
+if (btnText) {
+  btnText.addEventListener("click", copyApiLink);
 }

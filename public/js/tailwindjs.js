@@ -32,9 +32,22 @@ tailwind.config = {
 };
 
 // Automatically set dark mode if system prefers it
-if (
-  window.matchMedia &&
-  window.matchMedia("(prefers-color-scheme: dark)").matches
-) {
+// Get the media query for dark mode
+const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+// Initial check
+if (darkModeMediaQuery.matches) {
   document.documentElement.classList.add("dark");
+} else {
+  document.documentElement.classList.remove("dark");
 }
+
+// Listen for changes in system theme
+darkModeMediaQuery.addEventListener("change", (e) => {
+  if (e.matches) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+});
+

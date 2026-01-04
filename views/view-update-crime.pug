@@ -104,8 +104,8 @@ block content
             // Note: GeoJSON is [longitude, latitude], but Leaflet expects [latitude, longitude]
             const lat = Number('#{crime.location.coordinates.coordinates[1]}');
             const lon = Number('#{crime.location.coordinates.coordinates[0]}');
-            const crimeType = `#{crime.crimeType}`;
-            const address = `#{crime.location.address}`;
+            const crimeType = !{JSON.stringify(crime.crimeType)};
+            const address = !{JSON.stringify(crime.location.address)};
 
             // Define a custom icon for the marker
             const crimeIcon = L.icon({

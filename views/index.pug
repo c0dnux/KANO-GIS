@@ -11,6 +11,7 @@ html(lang="en")
     link(href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet")
     link(href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700;900&display=swap", rel="stylesheet")
     script(src="/js/tailwindjs.js") 
+    script(type="module" src="/js/index.js")
     style.
       .material-symbols-outlined {
         font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
@@ -126,6 +127,15 @@ html(lang="en")
                   | Security Insights
                 p(class="text-slate-600 dark:text-slate-400")
                   | Gain valuable insights to improve community safety and security strategies.
+              div(class="bg-white dark:bg-slate-800/50 p-8 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col items-center text-center shadow-sm hover:shadow-lg transition-shadow")
+                div(class="bg-primary/10 dark:bg-primary/20 text-primary p-4 rounded-full mb-6")
+                  span(class="material-symbols-outlined text-3xl") api
+                h4(class="text-xl font-bold mb-2 text-slate-900 dark:text-white") Free API Requests
+                p(class="text-slate-600 dark:text-slate-400")
+                  | Everyone gets 100 free requests daily to our public crime data API.
+                button(id="btn-copy-api" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 transition-all")
+                  span(class="material-symbols-outlined text-[20px]") link
+                  span(id="btn-copy-text") Copy API
 
         section#contact(class="py-16 md:py-24 bg-white dark:bg-slate-900")
           .container.mx-auto.px-6
