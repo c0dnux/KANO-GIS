@@ -65,7 +65,7 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
   user.confirmToken = undefined;
   user.confirmTokenExpires = undefined;
   user.active = true;
-  user.accessStatus.status = "granted";
+
   await user.save({ validateBeforeSave: false });
 
   // const token = signToken(user._id);

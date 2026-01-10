@@ -136,8 +136,23 @@ if (reportCrimeForm) {
         state,
       },
     };
+    const btn = document.querySelector("#report-crime-btn");
+    const originalText = btn.textContent;
 
-    await reportCrime(data);
+    try {
+      // Disable button and show loading
+      btn.disabled = true;
+      btn.textContent = "Loading...";
+
+      // Call API
+      await reportCrime(data);
+    } catch (err) {
+      console.error("Failed to report crime:", err);
+    } finally {
+      // Always revert button
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
   });
 }
 ///////--------UPDATE REPORT FORM LOGIC ---------//////
