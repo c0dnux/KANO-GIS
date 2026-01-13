@@ -44,7 +44,23 @@ if (loginForm) {
     const password = document.getElementById("password").value;
     console.log(email, password);
     const data = { email, password };
-    await auth("login", data);
+    const btn = document.querySelector("#login-btn");
+    const originalText = btn.textContent;
+
+    try {
+      // Disable button and show loading
+      btn.disabled = true;
+      btn.textContent = "Loading...";
+
+      // Call API
+      await auth("login", data);
+    } catch (err) {
+      console.error("Failed to report crime:", err);
+    } finally {
+      // Always revert button
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
   });
 }
 if (logoutBtn) {
@@ -64,7 +80,23 @@ if (userSignup) {
       confirmPassword: document.getElementById("confirmPassword").value,
     };
 
-    await auth("signup", form);
+    const btn = document.querySelector("#signup-btn");
+    const originalText = btn.textContent;
+
+    try {
+      // Disable button and show loading
+      btn.disabled = true;
+      btn.textContent = "Loading...";
+
+      // Call API
+      await auth("signup", form);
+    } catch (err) {
+      console.error("Failed to report crime:", err);
+    } finally {
+      // Always revert button
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
   });
 }
 if (resetPasswordForm) {
