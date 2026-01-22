@@ -16,18 +16,20 @@ const apiLimiter = rateLimit({
   },
 });
 router.post("/report", authController.protect, crimeController.reportCrime);
-router.get("/allCrimes", apiLimiter, crimeController.getAllCrimes);
+
 router.patch(
   "/crime-update/:reportId",
   authController.protect,
   authController.restrictTo("admin"),
-  crimeController.updateCrime
+  crimeController.updateCrime,
 );
 router.post("/:reportId", authController.protect, crimeController.getCrime);
 router.get(
   "/download-crime-report",
   authController.protect,
   authController.restrictTo("admin"),
-  crimeController.downloadCrimeReport
+  crimeController.downloadCrimeReport,
 );
+/// API Endpoint
+router.get("/allCrimes", apiLimiter, crimeController.getAllCrimes);
 module.exports = router;
