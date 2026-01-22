@@ -32,10 +32,12 @@ block content
                         input(id="date" type="datetime-local" required class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
 
                     // Address
-                    div(class="md:col-span-2")
+                    div(class="md:col-span-2 relative")
                         label(for="address" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Address
-                        input(id="address" type="text" placeholder="e.g., 123 Main Street" required class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
-
+                        input(id="address" type="text" placeholder="e.g., 123 Main Street" autocomplete="off" required class="form-input w-full rounded border-gray-300 dark:border-gray-700 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary")
+                        
+                        // Suggestion Dropdown
+                        ul(id="suggestions-list" class="hidden absolute z-50 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto mt-1")
                     // City
                     div
                         label(for="city" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") City / Area
@@ -43,7 +45,7 @@ block content
 
                     // Local Government
                     div
-                        label(for="location" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Local Government
+                        label(for="local-government" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2") Local Government
                         select(id="local-government" class="w-full rounded border-primary/30 bg-background-light dark:bg-background-dark/50 focus:ring-primary focus:border-primary text-gray-900 dark:text-gray-200")
                             option(value="Ajingi") Ajingi
                             option(value="Albasu") Albasu
@@ -110,3 +112,99 @@ block content
                 div(class="flex justify-end gap-4 pt-4")
                     button(id="report-crime-btn" type="submit" class="bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/90 transition-colors") Submit Report
     script(src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js" integrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA==" crossorigin="anonymous" referrerpolicy="no-referrer")
+    script.
+        document.addEventListener('DOMContentLoaded', () => {
+            const addressInput = document.getElementById('address');
+            const suggestionsList = document.getElementById('suggestions-list');
+            const cityInput = document.getElementById('city'); // We will autofill this
+            const lgaSelect = document.getElementById('local-government');
+            
+            // REPLACE WITH YOUR ACTUAL API KEY
+            const HERE_API_KEY = '!{hereApiKey}';
+
+            // Bounding Box for Kano State (West, South, East, North)
+            const KANO_BBOX = '7.5,10.5,10.6,13.0';
+
+            let debounceTimer;
+
+            // 1. Listen for typing
+            addressInput.addEventListener('input', (e) => {
+                const query = e.target.value;
+                clearTimeout(debounceTimer);
+
+                if (query.length < 3) {
+                    suggestionsList.classList.add('hidden');
+                    return;
+                }
+
+                debounceTimer = setTimeout(() => {
+                    fetchSuggestions(query);
+                }, 300);
+            });
+
+            // 2. Fetch from API
+            async function fetchSuggestions(query) {
+                try {
+                    const params = new URLSearchParams({
+                        q: query,
+                        in: `bbox:${KANO_BBOX}`,
+                        limit: '3',
+                        apiKey: HERE_API_KEY
+                    });
+
+                    const res = await fetch(`https://autosuggest.search.hereapi.com/v1/autosuggest?${params}`);
+                    const data = await res.json();
+                    renderSuggestions(data.items);
+                } catch (error) {
+                    console.error('Error fetching address:', error);
+                }
+            }
+
+            // 3. Render List
+            function renderSuggestions(items) {
+                suggestionsList.innerHTML = '';
+                if (!items || items.length === 0) {
+                    suggestionsList.classList.add('hidden');
+                    return;
+                }
+
+                items.forEach(item => {
+                    if (item.resultType === 'place' || item.resultType === 'houseNumber' || item.address) {
+                        const li = document.createElement('li');
+                        li.className = "px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-sm text-gray-700 dark:text-gray-200 border-b last:border-0 border-gray-200 dark:border-gray-600";
+                        li.textContent = item.address.label;
+
+                        li.addEventListener('click', () => {
+                            // Fill Address
+                            addressInput.value = item.address.label;
+                            const label = item.address.label;
+                            const city = label.split(',')[1]?.trim();
+                            const localGov = label.split(',')[2]?.trim();
+                            // Optional: Try to fill City/District if available
+                            if(city) {
+                                cityInput.value = city;
+                            }
+                            if(localGov) {
+                                for (let option of lgaSelect.options) {
+                                    if (option.value.toLowerCase() === localGov.toLowerCase()) {
+                                        option.selected = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            suggestionsList.classList.add('hidden');
+                        });
+                        suggestionsList.appendChild(li);
+                    }
+                });
+                suggestionsList.classList.remove('hidden');
+            }
+
+            // 4. Hide when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!addressInput.contains(e.target) && !suggestionsList.contains(e.target)) {
+                    suggestionsList.classList.add('hidden');
+                }
+            });
+        });

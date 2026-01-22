@@ -85,7 +85,7 @@ exports.signin = catchAsync(async (req, res, next) => {
   }
 
   if (!user.active) {
-    return next(new AppError("This acount is deleted or not activated.", 401));
+    return next(new AppError("This acount not activated.", 401));
   }
   const isCorrect = await user.isCorrectPassword(password, user.password);
 
@@ -233,7 +233,6 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
   }
 });
 exports.resetPassword = catchAsync(async (req, res, next) => {
-  console.log(req.body);
 
   const resetToken = req.body.token || req.params.token;
   if (req.body.password !== req.body.confirmPassword) {

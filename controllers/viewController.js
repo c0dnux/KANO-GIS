@@ -121,6 +121,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 exports.reportCrime = catchAsync(async (req, res, next) => {
   res.status(200).render("report-crime", {
     title: "Crime Repo - Report a crime",
+    hereApiKey: process.env.HERE_GEOCODE_API_KEY,
     page: "report",
   });
 });
