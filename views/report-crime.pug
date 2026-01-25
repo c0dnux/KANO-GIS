@@ -178,21 +178,33 @@ block content
                             // Fill Address
                             addressInput.value = item.address.label;
                             const label = item.address.label;
-                            const city = label.split(',')[1]?.trim();
-                            const localGov = label.split(',')[2]?.trim();
-                            // Optional: Try to fill City/District if available
-                            if(city) {
+                            console.log(label.split(',').length)
+                            if(label.split(',').length === 4) {
+                                const city = label.split(',')[1]?.trim();
+                                const localGov = label.split(',')[2]?.trim(); 
+                                if(city) {
                                 cityInput.value = city;
-                            }
-                            if(localGov) {
-                                for (let option of lgaSelect.options) {
-                                    if (option.value.toLowerCase() === localGov.toLowerCase()) {
-                                        option.selected = true;
-                                        break;
-                                    }
                                 }
+                                if(localGov) {
+                                    for (let option of lgaSelect.options) {
+                                        if (option.value.toLowerCase() === localGov.toLowerCase()) {
+                                            option.selected = true;
+                                            break;
+                                        }
+                                    }
+                                } 
+                            }else if(label.split(',').length === 3){
+                                const localGov = label.split(',')[1]?.trim();
+                                if(localGov) {
+                                    for (let option of lgaSelect.options) {
+                                        if (option.value.toLowerCase() === localGov.toLowerCase()) {
+                                            option.selected = true;
+                                            break;
+                                        }
+                                    }
+                                }  
                             }
-
+                            
                             suggestionsList.classList.add('hidden');
                         });
                         suggestionsList.appendChild(li);
