@@ -3,7 +3,7 @@ const Crime = require("../models/crimeModel");
 const crypto = require("crypto");
 const User = require("../models/userModel");
 const AppError = require("../utils/appError");
-
+const Notification = require("../models/notificationModel");
 exports.home = catchAsync(async (req, res, next) => {
   const queryFilter = { crimeAuth: "Verified" };
   // Counts every crime report document.
@@ -194,10 +194,10 @@ exports.dashborad = catchAsync(async (req, res, next) => {
   // 2. Calculate statistics
   const total = allReports.length;
   const verified = allReports.filter(
-    (report) => report.crimeAuth === "Verified"
+    (report) => report.crimeAuth === "Verified",
   ).length;
   const pending = allReports.filter(
-    (report) => report.crimeAuth === "Pending"
+    (report) => report.crimeAuth === "Pending",
   ).length;
 
   const stats = {
@@ -390,5 +390,46 @@ exports.userDetails = catchAsync(async (req, res, next) => {
       resolved,
       unknown,
     },
+  });
+});
+exports.notifications = catchAsync(async (req, res, next) => {
+  const notifications = await Notification.find()
+    .populate("crimeId")
+    .sort({ createdAt: -1 });
+  console.log(notifications);
+
+  // Transform into frontend-ready objects
+  const reportList = notifications
+    .map((noti) => {
+      if (!noti.crimeId) return null; // skip if crime was deleted
+
+      const crime = noti.crimeId;
+
+      // Calculate "time ago"
+      const diffMs = Date.now() - new Date(noti.createdAt).getTime();
+      let timeAgo;
+      if (diffMs < 60000) timeAgo = `${Math.floor(diffMs / 1000)} sec ago`;
+      else if (diffMs < 3600000)
+        timeAgo = `${Math.floor(diffMs / 60000)} min ago`;
+      else if (diffMs < 86400000)
+        timeAgo = `${Math.floor(diffMs / 3600000)} hr ago`;
+      else timeAgo = `${Math.floor(diffMs / 86400000)} days ago`;
+
+      return {
+        id: crime.reportId,
+        title: crime.crimeType,
+        timeAgo: timeAgo,
+        description: crime.description,
+        address: crime.location.address,
+        crimeAuth: crime.crimeAuth,
+        viewed: Boolean(noti.readAt),
+      };
+    })
+    .filter(Boolean); // remove nulls
+  console.log(reportList);
+  res.status(200).render("notifications", {
+    title: "Crime Repo - Notifications",
+    page: "notifications",
+    notifications: reportList,
   });
 });

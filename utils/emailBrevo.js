@@ -101,4 +101,10 @@ module.exports = class Email {
       "Your password reset token (valid for only 10 minutes)"
     );
   }
+  async reportNotification() {
+    await this.send(
+      "reportConfirmation",
+      "Update on your reported crime"
+    );
+  }
 };

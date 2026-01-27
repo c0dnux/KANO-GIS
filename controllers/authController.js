@@ -127,7 +127,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   if (userExist.accessStatus.status === "banned") {
     return next(new AppError("User Have been banned.", 401));
   }
-  if (
+  else if (
     userExist.accessStatus.status === "suspended" &&
     userExist.accessStatus.dateOfSuspensionEnd > Date.now()
   ) {

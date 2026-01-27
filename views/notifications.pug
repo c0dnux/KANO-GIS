@@ -1,0 +1,121 @@
+extends dashBase 
+
+block content
+    //- Uses "background-light" and "font-display" from your config
+    main(class="flex-1 flex flex-col h-full overflow-hidden bg-background-light dark:bg-background-dark relative font-display")
+
+        //- Inbox Toolbar
+        div(class="px-6 py-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0")
+            div
+                h2(class="text-xl font-bold text-gray-900 dark:text-gray-100") Incoming Reports
+                p(class="text-sm text-gray-500 dark:text-gray-400") Real-time feed of citizen reports
+
+            div(class="flex items-center gap-4")
+                div(class="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg")
+                    button(
+                        id="btn-all"
+                        class="px-4 py-1.5 text-sm font-medium rounded-md bg-white dark:bg-gray-600 shadow text-gray-900 dark:text-white transition-all"
+                    ) All
+                    button(
+                        id="btn-unread"
+                        class="px-4 py-1.5 text-sm font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all"
+                    ) Unread
+
+                button(class="relative p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full")
+                    span(class="material-symbols-outlined") notifications
+                    span(id="global-badge" class="absolute top-1 right-1 h-2.5 w-2.5 bg-red-500 rounded-full border border-white dark:border-gray-800")
+
+        //- Scrollable Report List
+        div(id="report-list" class="flex-1 overflow-y-auto p-4 sm:p-6")
+            div(class="max-w-4xl mx-auto space-y-3")
+                each notification in notifications
+                    //- XL radius from config. Bg switches based on unread state and dark mode
+                    - const isUnread = !notification.viewed
+                    div(
+                        class=`report-card cursor-pointer group relative border rounded-xl p-4 transition-all shadow-sm ${isUnread ? 'bg-white dark:bg-gray-800 border-primary/30' : 'bg-gray-50/50 dark:bg-background-dark border-gray-200 dark:border-gray-700'}`
+                        data-id=notification.id 
+                        data-viewed=`${notification.viewed}`
+                    )
+                        div(class="flex items-start gap-4")
+                            //- Using "primary" theme color
+                            - const crimeIcons = {
+                            -   "Theft": "local_mall",
+                            -   "Assault": "sports_martial_arts",
+                            -   "Fraud": "currency_bitcoin",
+                            -   "Murder": "skull", // choose a relevant icon
+                            -   "Kidnapping": "person_off",
+                            -   "Vandalism": "construction",
+                            -   "Other": "report"
+                            - }
+
+                            div(class="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0")
+                                span(class="material-symbols-outlined") #{crimeIcons[notification.title] || "report"}
+
+
+                            div(class="flex-1 min-w-0")
+                                div(class="flex items-center justify-between mb-1")
+                                    h3(class="text-base font-bold text-gray-900 dark:text-gray-100") #{notification.title}
+                                    span(class="text-xs font-semibold text-primary") #{notification.timeAgo}
+
+                                p(class="text-sm text-gray-700 dark:text-gray-300 font-medium mb-2 truncate") #{notification.description}
+
+                                div(class="flex items-center gap-3")
+                                    span(class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400")
+                                        span(class="material-symbols-outlined text-[16px]") location_on
+                                        | #{notification.address}
+
+                                    //- Dynamic status badges
+                                    - const authClasses = { Pending: 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800', Fake: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800', Verified: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' }
+                                    span(class=`text-xs px-2 py-0.5 rounded-full border ${authClasses[notification.crimeAuth] || ''}`)
+                                        | #{notification.crimeAuth}
+
+                        if isUnread
+                            div(class="unread-dot absolute top-4 right-4 h-2.5 w-2.5 bg-primary rounded-full animate-pulse")
+
+    script.
+        document.addEventListener('DOMContentLoaded', () => {
+            const notificationCards = document.querySelectorAll('.report-card');
+            const btnAll = document.getElementById('btn-all');
+            const btnUnread = document.getElementById('btn-unread');
+
+            // --- Click Handling ---
+            notificationCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const id = card.dataset.id;
+                    window.location.href = `/crime/${id}`;
+                });
+            });
+
+            // --- Filter Actions ---
+            btnAll.addEventListener('click', () => updateFilter('all'));
+            btnUnread.addEventListener('click', () => updateFilter('unread'));
+
+            function updateFilter(type) {
+                notificationCards.forEach(card => {
+                    if (type === 'all') {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.dataset.viewed === "true" ? card.classList.add('hidden') : card.classList.remove('hidden');
+                    }
+                });
+
+                // Toggle Button Visuals (matches your config text/bg logic)
+                if (type === 'all') {
+                    btnAll.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-white dark:bg-gray-600 shadow text-gray-900 dark:text-white transition-all";
+                    btnUnread.className = "px-4 py-1.5 text-sm font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all";
+                } else {
+                    btnUnread.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-white dark:bg-gray-600 shadow text-gray-900 dark:text-white transition-all";
+                    btnAll.className = "px-4 py-1.5 text-sm font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all";
+                }
+            }
+
+            // Global Badge Logic
+            const unreadCount = document.querySelectorAll('.report-card[data-viewed="false"]').length;
+            if (unreadCount === 0) {
+                const badges = ['global-badge', 'sidebar-global-badge'];
+                badges.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+            }
+        });

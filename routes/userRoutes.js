@@ -12,11 +12,11 @@ const limiter = rateLimit({
   handler: (req, res, next) => {
     // Custom response when the limit is exceeded
     return next(
-      new AppError("Trial limit exceeded. Wait after 5 minutes.", 429)
+      new AppError("Trial limit exceeded. Wait after 5 minutes.", 429),
     );
   },
 });
-  
+
 router.post("/signup", authController.signup);
 router.post("/login", limiter, authController.signin);
 router.post("/logout", authController.logout);
@@ -25,24 +25,24 @@ router.post("/resetPassword", authController.resetPassword);
 router.post(
   "/updatePassword",
   authController.protect,
-  authController.updatePassword
+  authController.updatePassword,
 );
 router.post(
   "/suspend/:id",
   authController.protect,
   authController.restrictTo("admin"),
-  authController.suspentAccount
+  authController.suspentAccount,
 );
 router.post(
   "/block/:id",
   authController.protect,
   authController.restrictTo("admin"),
-  authController.blockAccount
+  authController.blockAccount,
 );
 router.post(
   "/create_user",
   authController.protect,
   authController.restrictTo("admin"),
-  authController.createUser
+  authController.createUser,
 );
 module.exports = router;

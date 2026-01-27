@@ -61,7 +61,11 @@ script(type="module").
                 let roleBadge = '';
                 if (user.role === 'admin') {
                     roleBadge = `<span class="inline-flex rounded-full bg-primary/10 px-2 text-xs font-semibold leading-5 text-primary dark:bg-primary/20 dark:text-blue-300">Admin</span>`;
-                } else {
+                } else if (user.role === 'responder') {
+                    roleBadge = `<span class="inline-flex rounded-full bg-purple-100 dark:bg-purple-900/50 px-2 text-xs font-semibold leading-5 text-purple-800 dark:text-purple-300">Responder</span>`;
+
+                } 
+                else {
                     roleBadge = `<span class="inline-flex rounded-full bg-yellow-100 dark:bg-yellow-900/50 px-2 text-xs font-semibold leading-5 text-yellow-800 dark:text-yellow-300">User</span>`;
                 } 
 

@@ -1,9 +1,10 @@
 const express = require("express");
 const app = express();
-const cors = require('cors');
+const cors = require("cors");
 const errorController = require("./controllers/errorController");
 require("dotenv").config();
 const AppError = require("./utils/appError");
+const Notification = require("./models/notificationModel");
 const userRouter = require("./routes/userRoutes");
 const crimeRouter = require("./routes/crimeRoutes");
 const viewRouter = require("./routes/viewRoutes");
@@ -16,12 +17,14 @@ const cookieParser = require("cookie-parser");
 const hpp = require("hpp");
 const morgan = require("morgan");
 //            Global MiddleWares
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 //////CORS
-app.use(cors({
-  origin: "http://localhost:3000", // or your frontend domain
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:3000", // or your frontend domain
+    credentials: true,
+  }),
+);
 //Set security HTTP headers
 app.use(helmet());
 
@@ -90,9 +93,8 @@ app.use(
       // ✅ Allow frames if you’re embedding Paystack or map widgets
       frameSrc: ["'self'", "https://js.paystack.co"],
     },
-  })
+  }),
 );
-
 
 // Development Log
 
@@ -110,7 +112,7 @@ const limiter = rateLimit({
   handler: (req, res, next) => {
     // Custom response when the limit is exceeded
     return next(
-      new AppError("Trial limit exceeded. Wait after 60 minutes.", 429)
+      new AppError("Trial limit exceeded. Wait after 60 minutes.", 429),
     );
   },
 });
@@ -147,7 +149,7 @@ app.use(
       "difficulty",
       "price",
     ],
-  })
+  }),
 );
 
 //Data sanitization against XSS
@@ -157,14 +159,27 @@ app.use((req, res, next) => {
       JSON.stringify(req.body, (key, value) =>
         typeof value === "string"
           ? sanitizeHtml(value, { allowedTags: [], allowedAttributes: {} })
-          : value
-      )
+          : value,
+      ),
     );
   }
   next();
 });
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
+// Middleware to make unread count available everywhere
+app.use(async (req, res, next) => {
+  try {
+    // Replace with your actual Database logic
+    const unreadCount = await Notification.countDocuments({ readAt: null });
+    console.log(unreadCount);
+
+    res.locals.unreadCount = unreadCount;
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 //Routes
 
 app.use("/", viewRouter);

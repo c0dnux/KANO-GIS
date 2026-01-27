@@ -20,14 +20,14 @@ router.post("/report", authController.protect, crimeController.reportCrime);
 router.patch(
   "/crime-update/:reportId",
   authController.protect,
-  authController.restrictTo("admin"),
+  authController.restrictTo("responder", "admin"),
   crimeController.updateCrime,
 );
 router.post("/:reportId", authController.protect, crimeController.getCrime);
 router.get(
   "/download-crime-report",
   authController.protect,
-  authController.restrictTo("admin"),
+  authController.restrictTo("responder", "admin"),
   crimeController.downloadCrimeReport,
 );
 /// API Endpoint

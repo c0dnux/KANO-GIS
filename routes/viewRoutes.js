@@ -13,15 +13,21 @@ router.get("/reset-password/:token", viewController.resetPassword);
 router.get("/forgot-password", viewController.forgotPassword);
 router.get("/report-crime", authController.protect, viewController.reportCrime);
 router.get(
+  "/notifications",
+  authController.protect,
+  authController.restrictTo("responder"),
+  viewController.notifications,
+);
+router.get(
   "/all-crimes",
   authController.protect,
   authController.restrictTo("admin"),
-  viewController.allCrimes
+  viewController.allCrimes,
 );
 router.get(
   "/crime/:id",
   authController.protect,
-  viewController.viewUpdateCrime
+  viewController.viewUpdateCrime,
 );
 router.get("/settings", authController.protect, viewController.settings);
 router.get("/dashboard", authController.protect, viewController.dashborad);
@@ -29,19 +35,19 @@ router.get(
   "/analytics",
   authController.protect,
   authController.restrictTo("admin"),
-  viewController.analytics
+  viewController.analytics,
 );
 router.get(
   "/users",
   authController.protect,
   authController.restrictTo("admin"),
-  viewController.users
+  viewController.users,
 );
 router.get(
   "/user/:id",
   authController.protect,
   authController.restrictTo("admin"),
-  viewController.userDetails
+  viewController.userDetails,
 );
 //-------ACTIVATE ACCOUNT ------/////
 router.get("/login/:token", viewController.login);

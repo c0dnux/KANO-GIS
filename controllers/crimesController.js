@@ -4,6 +4,9 @@ const catchAsync = require("./../utils/catchAsync");
 const axios = require("axios");
 const AppError = require("../utils/appError");
 const UpdateLog = require("../models/update_log_model");
+const Notification = require("../models/notificationModel");
+const User = require("../models/userModel");
+const Email = require("../utils/emailBrevo");
 const ExcelJS = require("exceljs");
 const { set } = require("mongoose");
 exports.reportCrime = catchAsync(async (req, res, next) => {
@@ -16,7 +19,7 @@ exports.reportCrime = catchAsync(async (req, res, next) => {
         q: address,
         apiKey: process.env.HERE_GEOCODE_API_KEY,
       },
-    }
+    },
   );
 
   if (response.data.items.length === 0) {
@@ -60,7 +63,13 @@ exports.reportCrime = catchAsync(async (req, res, next) => {
   /*---------------END OF DUPLICATE CHECK --------------------*/
 
   const newCrime = await Crime.create(req.body);
-
+  if (newCrime) {
+    // Create a notification for the crime
+    await Notification.create({
+      crimeId: newCrime._id,
+      createdAt: new Date(),
+    });
+  }
   res.status(201).json({
     status: "Success",
     message: "Crime reported successfully",
@@ -78,7 +87,7 @@ exports.getAllCrimes = catchAsync(async (req, res, next) => {
 exports.getCrime = catchAsync(async (req, res, next) => {
   const crime = await Crime.findOne({ reportId: req.params.reportId }).populate(
     "reportedBy",
-    "name email"
+    "name email",
   );
   if (!crime) {
     return next(new AppError("No crime found with that ID", 404));
@@ -101,12 +110,12 @@ exports.updateCrime = catchAsync(async (req, res, next) => {
   const updatedCrime = await Crime.findOneAndUpdate(
     { reportId },
     { $set: req.body },
-    { new: true, runValidators: true }
-  );
+    { new: true, runValidators: true },
+  ).select("reportedBy");
 
   // Determine which fields changed
   const updatedFields = Object.keys(req.body).filter(
-    (key) => oldCrime[key] !== req.body[key]
+    (key) => oldCrime[key] !== req.body[key],
   );
 
   // Log the update
@@ -114,9 +123,17 @@ exports.updateCrime = catchAsync(async (req, res, next) => {
     updateType: "CrimeReport",
     recordId: updatedCrime._id,
     updatedFields,
-    updatedBy: req.user.id, // assuming you have authentication
+    updatedBy: req.user.id,
   });
+  const noti = await Notification.findOne({ crimeId: updatedCrime._id });
+  if (noti && !noti.readAt) {
+    noti.readAt = new Date();
+    await noti.save();
+  }
+  const reporter = await User.findById(updatedCrime.reportedBy);
 
+  const url = `${req.protocol}://${req.get("host")}/crime/${updatedCrime.reportId}`;
+  await new Email(reporter, url).reportNotification();
   res.status(200).json({
     status: "Success",
     message: "Crime updated successfully",
@@ -178,11 +195,11 @@ exports.downloadCrimeReport = catchAsync(async (req, res, next) => {
   // Send to browser
   res.setHeader(
     "Content-Type",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   );
   res.setHeader(
     "Content-Disposition",
-    'attachment; filename="crime_reports.xlsx"'
+    'attachment; filename="crime_reports.xlsx"',
   );
 
   await workbook.xlsx.write(res);

@@ -59,6 +59,16 @@ html(lang="en")
                 a(class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'update' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
                   span(class="material-symbols-outlined") update
                   span(class="text-sm font-medium") View / Update Report
+            if user.role === "responder"
+              li
+                a(href="/notifications" class=`relative flex items-center gap-3 px-3 py-2 rounded transition-all ${page === 'notifications' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
+                  div(class="relative flex items-center justify-center")
+                    span(class="material-symbols-outlined") notifications
+                    //- ONLY render the badge if unreadCount is greater than 0
+                    if unreadCount > 0
+                      span(id="sidebar-global-badge" class="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white dark:border-background-dark")
+                  span(class="text-sm font-medium") Notifications
+              
             if user && user.role === 'admin'
               li
                 a(href="/all-crimes" class=`flex items-center gap-3 px-3 py-2 rounded ${page === 'all-crimes' ? 'text-white bg-primary' : 'text-gray-900 dark:text-gray-100 hover:bg-primary/10 dark:hover:bg-primary/20'}`)
@@ -85,7 +95,8 @@ html(lang="en")
             - user.avatar = `https://placehold.co/40x40/${color}/FFFFFF?text=${initials}`;
             div(class="h-10 w-10 rounded-full bg-cover bg-center", style=`background-image: url('${user.avatar}')`)
             div
-              p(class="text-sm font-medium text-gray-900 dark:text-white") #{user.role === 'admin' ? 'Admin' : 'User'}
+              p(class="text-sm font-medium text-gray-900 dark:text-white")
+                | #{user.role === 'admin' ? 'Admin' : (user.role === 'responder' ? 'Responder' : 'User')}
               a(id="logout-btn" class="text-xs text-red-500 hover:underline") Logout
 
       // Main Content (Page-Specific)

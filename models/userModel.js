@@ -16,7 +16,7 @@ const userSchema = new Schema({
 
   role: {
     type: String,
-    enum: ["admin", "user"],
+    enum: ["admin", "responder", "user"],
     default: "user",
   },
   password: {
@@ -75,7 +75,7 @@ userSchema.pre("save", async function (next) {
 
 userSchema.methods.isCorrectPassword = async function (
   userPassword,
-  hashedPassword
+  hashedPassword,
 ) {
   return await bcrypt.compare(userPassword, hashedPassword);
 };
@@ -88,7 +88,7 @@ userSchema.methods.passwordChangedAfter = function (userTimeStamp) {
   if (this.passwordChangedAt) {
     const changedTimeStamp = parseInt(
       this.passwordChangedAt.getTime() / 1000,
-      10
+      10,
     );
 
     return changedTimeStamp > userTimeStamp;
