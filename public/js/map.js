@@ -1,16 +1,26 @@
-// --- 1. CONFIGURATION (Moved inside the function) ---
+// --- CONFIGURATION ---
 const crimeColorMap = {
-  Theft: "#FFA500", // Orange
-  Assault: "#FF4500", // OrangeRed
-  Fraud: "#4682B4", // SteelBlue
-  Murder: "#8B0000", // DarkRed
-  Kidnapping: "#000000", // Black
-  Vandalism: "#8A2BE2", // BlueViolet
-  Other: "#808080", // Gray
-  Default: "#808080", // Gray as a fallback
+  Theft: "#FFA500",
+  Assault: "#FF4500",
+  Fraud: "#4682B4",
+  Murder: "#8B0000",
+  Kidnapping: "#000000",
+  Vandalism: "#8A2BE2",
+  Other: "#808080",
+  Default: "#808080",
 };
 
-// --- HELPER FUNCTIONS (Not exported, only used within this file) ---
+const crimeHeatIntensity = {
+  Murder: 1.0,
+  Kidnapping: 0.9,
+  Assault: 0.8,
+  Theft: 0.6,
+  Fraud: 0.5,
+  Vandalism: 0.4,
+  Other: 0.3,
+};
+
+// --- HELPER FUNCTIONS ---
 const createCrimeIcon = (color) => {
   const markerHtml = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
         <circle cx="12" cy="12" r="10" fill="${color}" stroke="#fff" stroke-width="2"/>
@@ -24,29 +34,33 @@ const createCrimeIcon = (color) => {
   });
 };
 
+const buildMarkerPopup = (crime, color) => `
+  <div style="font-family: sans-serif; font-size: 14px; max-width: 250px;">
+    <strong style="font-size: 16px; color: ${color};">${crime.crimeType}</strong>
+    <hr style="margin: 4px 0;">
+    <p style="margin: 2px 0;"><strong>Desc:</strong> ${crime.description}</p>
+    <p style="margin: 2px 0;"><strong>Status:</strong> ${crime.status}</p>
+    <p style="margin: 2px 0;"><strong>Address:</strong> ${crime.location.address}, ${crime.location.localGovernment}</p>
+    <p style="margin: 2px 0;"><strong>Date:</strong> ${new Date(crime.date).toLocaleString()}</p>
+    <p style="margin: 2px 0;"><strong>Victims:</strong> ${crime.victims}</p>
+  </div>
+`;
+
 // --- MAIN EXPORTED FUNCTION ---
 export const initializeCrimeMap = (crimeData) => {
-  // Check if a map element exists before running any map code
   const mapElement = document.getElementById("map");
   if (!mapElement) return;
 
-  // --- 2. MAP INITIALIZATION ---
-  if (
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  ) {
+  if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
     document.documentElement.classList.add("dark");
   }
 
   const map = L.map("map", { zoomControl: false }).setView([12.0, 8.52], 12);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(map);
 
-  const markers = L.markerClusterGroup();
-
-  // --- 3. UI ELEMENT REFERENCES ---
+  // --- UI REFERENCES ---
   const crimeFilterContainer = document.getElementById("crime-type-filter");
   const dateFromInput = document.getElementById("date-from");
   const dateToInput = document.getElementById("date-to");
@@ -56,48 +70,126 @@ export const initializeCrimeMap = (crimeData) => {
   const zoomInBtn = document.getElementById("zoom-in-btn");
   const zoomOutBtn = document.getElementById("zoom-out-btn");
   const locateBtn = document.getElementById("locate-btn");
+  const toggleBtn = document.getElementById("view-toggle-btn");
 
-  // --- 4. FUNCTIONS ---
-  const displayCrimes = (crimes) => {
-    markers.clearLayers();
+  // --- BUILD BOTH LAYERS UPFRONT ---
+  const markerCluster = L.markerClusterGroup();
+  let heatLayer = null;
+  let currentMode = "markers";
+
+  const buildFromCrimes = (crimes) => {
+    markerCluster.clearLayers();
+
+    const heatData = [];
     crimes.forEach((crime) => {
-      const color = crimeColorMap[crime.crimeType] || crimeColorMap.Default;
-      const icon = createCrimeIcon(color);
-
       const lat = crime.location.coordinates.coordinates[1];
       const lng = crime.location.coordinates.coordinates[0];
+      const color = crimeColorMap[crime.crimeType] || crimeColorMap.Default;
+      const intensity = crimeHeatIntensity[crime.crimeType] || 0.3;
 
-      const marker = L.marker([lat, lng], { icon: icon });
+      // Marker
+      const marker = L.marker([lat, lng], { icon: createCrimeIcon(color) });
+      marker.bindPopup(buildMarkerPopup(crime, color));
+      markerCluster.addLayer(marker);
 
-      const popupContent = `
-        <div style="font-family: sans-serif; font-size: 14px; max-width: 250px;">
-          <strong style="font-size: 16px; color: ${color};">${
-        crime.crimeType
-      }</strong>
-          <hr style="margin: 4px 0;">
-          <p style="margin: 2px 0;"><strong>Desc:</strong> ${
-            crime.description
-          }</p>
-          <p style="margin: 2px 0;"><strong>Status:</strong> ${crime.status}</p>
-          <p style="margin: 2px 0;"><strong>Address:</strong> ${
-            crime.location.address
-          }, ${crime.location.localGovernment}</p>
-          <p style="margin: 2px 0;"><strong>Date:</strong> ${new Date(
-            crime.date
-          ).toLocaleString()}</p>
-          <p style="margin: 2px 0;"><strong>Victims:</strong> ${
-            crime.victims
-          }</p>
-        </div>
-      `;
-      marker.bindPopup(popupContent);
-      markers.addLayer(marker);
+      // Heat point
+      heatData.push([lat, lng, intensity]);
     });
-    map.addLayer(markers);
+
+    return heatData;
   };
 
+  const setHeatData = (crimes) => {
+    const heatData = [];
+    crimes.forEach((crime) => {
+      const lat = crime.location.coordinates.coordinates[1];
+      const lng = crime.location.coordinates.coordinates[0];
+      const intensity = crimeHeatIntensity[crime.crimeType] || 0.3;
+      heatData.push([lat, lng, intensity]);
+    });
+    return heatData;
+  };
+
+  // --- SWITCH LAYER ---
+  const switchToLayer = (mode, crimes) => {
+    // Remove whatever is on the map
+    if (map.hasLayer(markerCluster)) map.removeLayer(markerCluster);
+    if (heatLayer && map.hasLayer(heatLayer)) {
+      map.removeLayer(heatLayer);
+      heatLayer = null;
+    }
+
+    // Rebuild marker cluster
+    markerCluster.clearLayers();
+    crimes.forEach((crime) => {
+      const lat = crime.location.coordinates.coordinates[1];
+      const lng = crime.location.coordinates.coordinates[0];
+      const color = crimeColorMap[crime.crimeType] || crimeColorMap.Default;
+      const marker = L.marker([lat, lng], { icon: createCrimeIcon(color) });
+      marker.bindPopup(buildMarkerPopup(crime, color));
+      markerCluster.addLayer(marker);
+    });
+
+    // Add the requested layer
+    if (mode === "markers") {
+      map.addLayer(markerCluster);
+    } else {
+      // Build fresh heatmap layer (avoids stale internal state)
+      const heatData = setHeatData(crimes);
+      heatLayer = L.heatLayer(heatData, {
+        radius: 25,
+        blur: 15,
+        maxZoom: 17,
+        max: 1.0,
+        minOpacity: 0.4,
+        gradient: {
+          0.2: "#0000ff",
+          0.4: "#00ffff",
+          0.6: "#00ff00",
+          0.8: "#ffff00",
+          1.0: "#ff0000",
+        },
+      });
+      map.addLayer(heatLayer);
+    }
+  };
+
+  // --- FILTER LOGIC ---
+  const getFilteredCrimes = () => {
+    const selectedCrimeTypes = Array.from(
+      document.querySelectorAll("#crime-type-filter input:checked")
+    ).map((input) => input.value);
+
+    const dateFrom = dateFromInput.value;
+    const dateTo = dateToInput.value;
+    const selectedLocation = locationSelect.value;
+
+    return crimeData.filter((crime) => {
+      const crimeDate = new Date(crime.date);
+      const fromDate = dateFrom ? new Date(dateFrom) : null;
+      const toDate = dateTo ? new Date(new Date(dateTo).setHours(23, 59, 59, 999)) : null;
+
+      const typeMatch = selectedCrimeTypes.length === 0 || selectedCrimeTypes.includes(crime.crimeType);
+      const locationMatch = selectedLocation === "All" || crime.location.localGovernment === selectedLocation;
+      const dateFromMatch = !fromDate || crimeDate >= fromDate;
+      const dateToMatch = !toDate || crimeDate <= toDate;
+
+      return typeMatch && locationMatch && dateFromMatch && dateToMatch;
+    });
+  };
+
+  const applyFilters = () => switchToLayer(currentMode, getFilteredCrimes());
+  const removeFilters = () => {
+    document.querySelectorAll("#crime-type-filter input:checked").forEach((i) => (i.checked = false));
+    dateFromInput.value = "";
+    dateToInput.value = "";
+    locationSelect.value = "All";
+    switchToLayer(currentMode, crimeData);
+  };
+
+  // --- POPULATE CHECKBOXES ---
   const populateCrimeCheckboxes = () => {
-    const crimeTypes = [...new Set(crimeData.map((crime) => crime.crimeType))];
+    const crimeTypes = [...new Set(crimeData.map((c) => c.crimeType))];
     crimeFilterContainer.innerHTML = crimeTypes
       .map((type) => {
         const color = crimeColorMap[type] || crimeColorMap.Default;
@@ -114,61 +206,30 @@ export const initializeCrimeMap = (crimeData) => {
       .join("");
   };
 
-  const applyFilters = () => {
-    const selectedCrimeTypes = Array.from(
-      document.querySelectorAll("#crime-type-filter input:checked")
-    ).map((input) => input.value);
-
-    const dateFrom = dateFromInput.value;
-    const dateTo = dateToInput.value;
-    const selectedLocation = locationSelect.value;
-
-    const filteredCrimes = crimeData.filter((crime) => {
-      const crimeDate = new Date(crime.date);
-      const fromDate = dateFrom ? new Date(dateFrom) : null;
-      const toDate = dateTo
-        ? new Date(new Date(dateTo).setHours(23, 59, 59, 999))
-        : null;
-
-      const typeMatch =
-        selectedCrimeTypes.length === 0 ||
-        selectedCrimeTypes.includes(crime.crimeType);
-      const locationMatch =
-        selectedLocation === "All" ||
-        crime.location.localGovernment === selectedLocation;
-      const dateFromMatch = !fromDate || crimeDate >= fromDate;
-      const dateToMatch = !toDate || crimeDate <= toDate;
-
-      return typeMatch && locationMatch && dateFromMatch && dateToMatch;
-    });
-
-    displayCrimes(filteredCrimes);
-  };
-
-  const removeFilters = () => {
-    document
-      .querySelectorAll("#crime-type-filter input:checked")
-      .forEach((input) => (input.checked = false));
-    dateFromInput.value = "";
-    dateToInput.value = "";
-    locationSelect.value = "All";
-    displayCrimes(crimeData);
-  };
-
-  // --- 5. EVENT LISTENERS ---
+  // --- EVENT LISTENERS ---
   applyBtn.addEventListener("click", applyFilters);
   removeBtn.addEventListener("click", removeFilters);
   zoomInBtn.addEventListener("click", () => map.zoomIn());
   zoomOutBtn.addEventListener("click", () => map.zoomOut());
-  locateBtn.addEventListener("click", () =>
-    map.locate({ setView: true, maxZoom: 15 })
-  );
-  map.on("locationfound", (e) =>
-    L.marker(e.latlng).addTo(map).bindPopup("You are here!").openPopup()
-  );
+  locateBtn.addEventListener("click", () => map.locate({ setView: true, maxZoom: 15 }));
+  map.on("locationfound", (e) => L.marker(e.latlng).addTo(map).bindPopup("You are here!").openPopup());
   map.on("locationerror", (e) => alert(e.message));
 
-  // --- 6. INITIAL RENDER ---
+  toggleBtn.addEventListener("click", () => {
+    const crimes = getFilteredCrimes();
+    if (currentMode === "markers") {
+      currentMode = "heatmap";
+      toggleBtn.innerHTML = `<span class="material-symbols-outlined text-gray-800 dark:text-gray-200">map</span>`;
+      toggleBtn.title = "Switch to Marker View";
+    } else {
+      currentMode = "markers";
+      toggleBtn.innerHTML = `<span class="material-symbols-outlined text-gray-800 dark:text-gray-200">local_fire_department</span>`;
+      toggleBtn.title = "Switch to Heatmap View";
+    }
+    switchToLayer(currentMode, crimes);
+  });
+
+  // --- INITIAL RENDER ---
   populateCrimeCheckboxes();
-  displayCrimes(crimeData);
+  map.addLayer(markerCluster);
 };

@@ -22,7 +22,9 @@ html(lang="en")
         link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" integrity="sha512-6ZCLMiYwTeli2rVh3XAPxy3YoR5fVxGdH/pz+KMCzRY2M65Emgkw00Yqmhh8qLGeYQ3LbVZGdmOX9KUjSKr0TA==" crossorigin="anonymous" referrerpolicy="no-referrer")
 
         style.
-            /* Your inline styles remain the same */
+            .leaflet-heat-layer {
+                pointer-events: none;
+            }
             .leaflet-control-container .leaflet-control {
                 background-color: rgba(255, 255, 255, 0.8) !important;
                 color: #333 !important;
@@ -158,11 +160,14 @@ html(lang="en")
                                 span(class="material-symbols-outlined text-gray-800 dark:text-gray-200") remove
                         button#locate-btn(class="flex size-10 items-center justify-center rounded-lg bg-white/80 dark:bg-background-dark/80 backdrop-blur-sm shadow-md hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors" aria-label="Find my location")
                             span(class="material-symbols-outlined text-gray-800 dark:text-gray-200") my_location
+                        button#view-toggle-btn(class="flex size-10 items-center justify-center rounded-lg bg-white/80 dark:bg-background-dark/80 backdrop-blur-sm shadow-md hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors" aria-label="Toggle map view" title="Switch to Heatmap View")
+                            span(class="material-symbols-outlined text-gray-800 dark:text-gray-200") local_fire_department
 
 
     //- JavaScript libraries at the end of the body with CORRECTED integrity hashes
     script(src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg==" crossorigin="anonymous" referrerpolicy="no-referrer")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js" integrity="sha512-OFs3W4DIZ5ZkrDhBFtsCP6JXtMEDGmhl0QPlmWYBJay40TT1n3gt2Xuw8Pf/iezgW9CdabjkNChRqozl/YADmg==" crossorigin="anonymous" referrerpolicy="no-referrer")
+    script(src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js" crossorigin="anonymous" referrerpolicy="no-referrer")
 
     //- Your custom scripts, which depend on the libraries above
     script(type="module" src="/js/index.js")
