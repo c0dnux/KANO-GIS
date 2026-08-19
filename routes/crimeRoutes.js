@@ -3,6 +3,7 @@ const crimeController = require("../controllers/crimesController");
 const router = express.Router();
 const authController = require("../controllers/authController");
 const rateLimit = require("express-rate-limit");
+const { cacheMiddleware } = require("../utils/cache");
 
 // Create a limiter
 const apiLimiter = rateLimit({
@@ -23,7 +24,12 @@ router.patch(
   authController.restrictTo("responder", "admin"),
   crimeController.updateCrime,
 );
-router.post("/:reportId", authController.protect, crimeController.getCrime);
+router.post(
+  "/:reportId",
+  authController.protect,
+  cacheMiddleware("crime", 300),
+  crimeController.getCrime,
+);
 router.get(
   "/download-crime-report",
   authController.protect,
@@ -31,5 +37,10 @@ router.get(
   crimeController.downloadCrimeReport,
 );
 /// API Endpoint
-router.get("/allCrimes", apiLimiter, crimeController.getAllCrimes);
+router.get(
+  "/allCrimes",
+  apiLimiter,
+  cacheMiddleware("crimes", 300),
+  crimeController.getAllCrimes,
+);
 module.exports = router;

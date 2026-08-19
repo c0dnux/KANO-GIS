@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const { signTokenHandler } = require("./../utils/customfuncs");
 const Email = require("./../utils/emailBrevo");
 const AppError = require("./../utils/appError");
+const UpdateLog = require("./../models/update_log_model");
 
 exports.signup = catchAsync(async (req, res, next) => {
   const allowed = ["name", "email", "password", "confirmPassword"];
@@ -41,8 +42,6 @@ exports.signup = catchAsync(async (req, res, next) => {
   const newUser = new User(gotten);
   const confirmToken = newUser.confirmTokenGen();
   await newUser.save();
-  console.log(newUser);
-
   const url = `${req.protocol}://${req.get("host")}/login/${confirmToken}`;
 
   await new Email(newUser, url).sendWelcome();
@@ -158,7 +157,7 @@ exports.isLoggedIn = async (req, res, next) => {
   //Check if token exist
   if (req.cookies.jwt) {
     try {
-      token = req.cookies.jwt;
+      const token = req.cookies.jwt;
 
       ///Check if token is valid
       const jwtPomisified = promisify(jwt.verify);
@@ -186,14 +185,27 @@ exports.isLoggedIn = async (req, res, next) => {
   }
   next();
 };
-//Dont put catchAsync here
-exports.logout = (req, res) => {
+exports.logout = catchAsync(async (req, res) => {
+  const refreshToken = req.cookies.jwt_refresh;
+  if (refreshToken) {
+    const User = require("./../models/userModel");
+    await User.findOneAndUpdate(
+      { refreshToken },
+      { refreshToken: undefined, refreshTokenExpires: undefined }
+    );
+  }
+
   res.cookie("jwt", "loggedout", {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
   });
+  res.cookie("jwt_refresh", "loggedout", {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+    path: "/api/v1/users/refresh-token",
+  });
   res.status(200).json({ status: "Success" });
-};
+});
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
@@ -206,8 +218,6 @@ exports.restrictTo = (...roles) => {
 };
 
 exports.forgetPassword = catchAsync(async (req, res, next) => {
-  console.log(req.body);
-
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
@@ -223,8 +233,6 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
     await new Email(user, resetURL).sendPasswordReset();
     res.status(200).json({ status: "Success", message: "Token sent to email" });
   } catch (error) {
-    console.log(error);
-
     user.confirmToken = undefined;
     user.confirmTokenExpires = undefined;
     await user.save({ validateBeforeSave: false });
@@ -286,7 +294,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   signTokenHandler(200, "Password updated", res, user);
 });
 
-exports.suspentAccount = catchAsync(async (req, res, next) => {
+exports.suspendAccount = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.params.id);
   if (!user) {
     return next(new AppError("No user with the given ID", 404));
@@ -352,4 +360,43 @@ exports.createUser = catchAsync(async (req, res, next) => {
   res
     .status(201)
     .json({ status: "Success", data: { user }, message: "User Created" });
+});
+
+exports.refreshToken = catchAsync(async (req, res, next) => {
+  const refreshToken = req.cookies.jwt_refresh || req.body.refreshToken;
+
+  if (!refreshToken) {
+    return next(new AppError("Refresh token not provided", 401));
+  }
+
+  const jwtPomisified = promisify(jwt.verify);
+  let decoded;
+  try {
+    decoded = await jwtPomisified(refreshToken, process.env.JWT_SECRET);
+  } catch (err) {
+    return next(new AppError("Invalid or expired refresh token", 401));
+  }
+
+  const user = await User.findById(decoded.id).select("+refreshToken +refreshTokenExpires");
+  if (!user) {
+    return next(new AppError("User no longer exists", 401));
+  }
+
+  if (user.refreshToken !== refreshToken) {
+    return next(new AppError("Refresh token does not match", 401));
+  }
+
+  if (user.refreshTokenExpires && user.refreshTokenExpires < Date.now()) {
+    return next(new AppError("Refresh token has expired", 401));
+  }
+
+  if (user.accessStatus.status === "banned") {
+    return next(new AppError("User has been banned", 401));
+  }
+
+  if (user.accessStatus.status === "suspended" && user.accessStatus.dateOfSuspensionEnd > Date.now()) {
+    return next(new AppError("User is suspended", 401));
+  }
+
+  await signTokenHandler(200, "Token refreshed", res, user);
 });

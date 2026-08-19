@@ -27,7 +27,7 @@ const crimeReportSchema = new mongoose.Schema(
       ],
       default: "Other",
     },
-    date: { required: [true, "Date is required"], type: Date, required: true },
+    date: { type: Date, required: [true, "Date is required"] },
     status: {
       type: String,
       enum: ["Unknown", "Under Investigation", "Resolved"],

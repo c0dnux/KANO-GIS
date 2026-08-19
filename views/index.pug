@@ -145,7 +145,7 @@ html(lang="en")
               p(class="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto")
                 | Have a question or need support? Fill out the form below and we'll get back to you as soon as possible.
             .max-w-2xl.mx-auto
-              form.space-y-6
+              form.space-y-6(id="contact-form")
                 div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
                   div
                     label(class="block.text-sm.font-medium.text-slate-700.dark:text-slate-300.mb-2" for="name") Full Name
@@ -175,4 +175,38 @@ html(lang="en")
       ) {
         // If it is, add the 'dark' class to the <html> element
         document.documentElement.classList.add("dark");
+      }
+
+      const contactForm = document.getElementById('contact-form');
+      if (contactForm) {
+        contactForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const btn = contactForm.querySelector('button[type="submit"]');
+          const originalText = btn.textContent;
+          btn.disabled = true;
+          btn.textContent = 'Sending...';
+
+          const data = {
+            name: contactForm.name.value,
+            email: contactForm.email.value,
+            subject: contactForm.subject.value,
+            message: contactForm.message.value,
+          };
+
+          try {
+            const res = await fetch('/contact', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            });
+            const result = await res.json();
+            alert(result.message);
+            if (result.status === 'Success') contactForm.reset();
+          } catch (err) {
+            alert('Failed to send message. Please try again.');
+          } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
+          }
+        });
       }

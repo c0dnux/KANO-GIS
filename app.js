@@ -8,7 +8,7 @@ const Notification = require("./models/notificationModel");
 const userRouter = require("./routes/userRoutes");
 const crimeRouter = require("./routes/crimeRoutes");
 const viewRouter = require("./routes/viewRoutes");
-const rateLimit = require("express-rate-limit");
+const slidingWindow = require("./utils/slidingWindow");
 const helmet = require("helmet");
 const ems = require("express-mongo-sanitize");
 const sanitizeHtml = require("sanitize-html");
@@ -16,12 +16,13 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const hpp = require("hpp");
 const morgan = require("morgan");
+const { cacheGet, cacheSet } = require("./utils/cache");
 //            Global MiddleWares
 app.set("trust proxy", 1);
 //////CORS
 app.use(
   cors({
-    origin: "http://localhost:3000", // or your frontend domain
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
     credentials: true,
   }),
 );
@@ -103,18 +104,10 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // Limitter
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 60 minutes
-  limit: 100, // Limit each IP to 30 requests per `window` (here, per 60 minutes).
-  standardHeaders: "draft-8", // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
-  // store: ... , // Redis, Memcached, etc. See below.
-  handler: (req, res, next) => {
-    // Custom response when the limit is exceeded
-    return next(
-      new AppError("Trial limit exceeded. Wait after 60 minutes.", 429),
-    );
-  },
+const limiter = slidingWindow({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: "Too many requests. Try again in 15 minutes.",
 });
 
 app.use(express.static(path.join(__dirname, "public")));
@@ -169,16 +162,22 @@ app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 // Middleware to make unread count available everywhere
 app.use(async (req, res, next) => {
-  try {
-    // Replace with your actual Database logic
-    const unreadCount = await Notification.countDocuments({ readAt: null });
-    console.log(unreadCount);
-
-    res.locals.unreadCount = unreadCount;
-    next();
-  } catch (err) {
-    next(err);
+  res.locals.unreadCount = 0;
+  if (req.cookies.jwt) {
+    try {
+      const cached = await cacheGet("global:unreadCount");
+      if (cached !== null) {
+        res.locals.unreadCount = cached;
+      } else {
+        const unreadCount = await Notification.countDocuments({ readAt: null });
+        res.locals.unreadCount = unreadCount;
+        await cacheSet("global:unreadCount", unreadCount, 30);
+      }
+    } catch (err) {
+      res.locals.unreadCount = 0;
+    }
   }
+  next();
 });
 //Routes
 
@@ -192,6 +191,10 @@ app.use("/api/v1/crimes", crimeRouter);
 //Catch undefinded path
 app.use((req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server.`, 404));
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
 app.use(errorController);

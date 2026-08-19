@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const User = require("../models/userModel");
 const AppError = require("../utils/appError");
 const Notification = require("../models/notificationModel");
+const Email = require("../utils/emailBrevo");
 exports.home = catchAsync(async (req, res, next) => {
   const queryFilter = { crimeAuth: "Verified" };
   // Counts every crime report document.
@@ -187,7 +188,7 @@ exports.settings = catchAsync(async (req, res, next) => {
     page: "settings",
   });
 });
-exports.dashborad = catchAsync(async (req, res, next) => {
+exports.dashboard = catchAsync(async (req, res, next) => {
   // 1. Find all reports submitted by the current user
   const allReports = await Crime.find({ reportedBy: req.user.id });
 
@@ -321,8 +322,6 @@ exports.analytics = catchAsync(async (req, res, next) => {
 });
 exports.users = catchAsync(async (req, res, next) => {
   const users = await User.find().select("+active");
-  console.log(users);
-
   res.status(200).render("all_users", {
     title: "Crime Repo - User Management",
     page: "users",
@@ -374,8 +373,6 @@ exports.userDetails = catchAsync(async (req, res, next) => {
     reportedBy: userId,
     status: "Unknown",
   });
-  console.log(totalCrimes, verified);
-
   res.status(200).render("user", {
     title: `Crime Repo - User: ${userDetails.name}`,
     page: "user",
@@ -396,8 +393,6 @@ exports.notifications = catchAsync(async (req, res, next) => {
   const notifications = await Notification.find()
     .populate("crimeId")
     .sort({ createdAt: -1 });
-  console.log(notifications);
-
   // Transform into frontend-ready objects
   const reportList = notifications
     .map((noti) => {
@@ -426,10 +421,31 @@ exports.notifications = catchAsync(async (req, res, next) => {
       };
     })
     .filter(Boolean); // remove nulls
-  console.log(reportList);
   res.status(200).render("notifications", {
     title: "Crime Repo - Notifications",
     page: "notifications",
     notifications: reportList,
+  });
+});
+
+exports.submitContact = catchAsync(async (req, res, next) => {
+  const { name, email, subject, message } = req.body;
+
+  if (!name || !email || !subject || !message) {
+    return next(new AppError("All fields are required", 400));
+  }
+
+  const admin = await User.findOne({ role: "admin" });
+  if (admin) {
+    const contactEmail = new Email(
+      admin,
+      `${req.protocol}://${req.get("host")}`
+    );
+    await contactEmail.sendContactForm(name, email, subject, message);
+  }
+
+  res.status(200).json({
+    status: "Success",
+    message: "Your message has been sent. We will get back to you soon.",
   });
 });

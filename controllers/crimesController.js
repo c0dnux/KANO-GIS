@@ -1,4 +1,3 @@
-// import Crime from "../models/crimeModel";
 const Crime = require("../models/crimeModel");
 const catchAsync = require("./../utils/catchAsync");
 const axios = require("axios");
@@ -8,7 +7,8 @@ const Notification = require("../models/notificationModel");
 const User = require("../models/userModel");
 const Email = require("../utils/emailBrevo");
 const ExcelJS = require("exceljs");
-const { set } = require("mongoose");
+const { cacheMiddleware, invalidateCache } = require("../utils/cache");
+
 exports.reportCrime = catchAsync(async (req, res, next) => {
   const address = `${req.body.location.address} ${req.body.location.city} ${req.body.location.localGovernment}, ${req.body.location.state}, Nigeria`;
 
@@ -64,12 +64,19 @@ exports.reportCrime = catchAsync(async (req, res, next) => {
 
   const newCrime = await Crime.create(req.body);
   if (newCrime) {
-    // Create a notification for the crime
     await Notification.create({
       crimeId: newCrime._id,
       createdAt: new Date(),
     });
   }
+  await invalidateCache("crimes:*");
+  await invalidateCache("home:*");
+  await invalidateCache("map:*");
+  await invalidateCache("analytics:*");
+  await invalidateCache("all-crimes:*");
+  await invalidateCache("dashboard:*");
+  await invalidateCache("notifications:*");
+  await invalidateCache("global:unreadCount");
   res.status(201).json({
     status: "Success",
     message: "Crime reported successfully",
@@ -77,10 +84,19 @@ exports.reportCrime = catchAsync(async (req, res, next) => {
   });
 });
 exports.getAllCrimes = catchAsync(async (req, res, next) => {
-  const crimes = await Crime.find();
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 20;
+  const skip = (page - 1) * limit;
+
+  const crimes = await Crime.find().skip(skip).limit(limit);
+  const total = await Crime.countDocuments();
+
   res.status(200).json({
     status: "Success",
     results: crimes.length,
+    total,
+    page,
+    pages: Math.ceil(total / limit),
     data: crimes,
   });
 });
@@ -100,22 +116,27 @@ exports.getCrime = catchAsync(async (req, res, next) => {
 exports.updateCrime = catchAsync(async (req, res, next) => {
   const { reportId } = req.params;
 
-  // Get the old crime record first
   const oldCrime = await Crime.findOne({ reportId });
   if (!oldCrime) {
     return next(new AppError("No crime found with that ID", 404));
   }
 
-  // Update the record
+  const allowedFields = ["description", "crimeType", "date", "status", "crimeAuth", "victims", "location"];
+  const filteredBody = {};
+  Object.keys(req.body).forEach((key) => {
+    if (allowedFields.includes(key)) {
+      filteredBody[key] = req.body[key];
+    }
+  });
+
   const updatedCrime = await Crime.findOneAndUpdate(
     { reportId },
-    { $set: req.body },
+    { $set: filteredBody },
     { new: true, runValidators: true },
   ).select("reportedBy");
 
-  // Determine which fields changed
-  const updatedFields = Object.keys(req.body).filter(
-    (key) => oldCrime[key] !== req.body[key],
+  const updatedFields = Object.keys(filteredBody).filter(
+    (key) => String(oldCrime[key]) !== String(filteredBody[key]),
   );
 
   // Log the update
@@ -134,6 +155,13 @@ exports.updateCrime = catchAsync(async (req, res, next) => {
 
   const url = `${req.protocol}://${req.get("host")}/crime/${updatedCrime.reportId}`;
   await new Email(reporter, url).reportNotification();
+  await invalidateCache("crimes:*");
+  await invalidateCache("home:*");
+  await invalidateCache("map:*");
+  await invalidateCache("analytics:*");
+  await invalidateCache("all-crimes:*");
+  await invalidateCache("dashboard:*");
+  await invalidateCache("global:unreadCount");
   res.status(200).json({
     status: "Success",
     message: "Crime updated successfully",

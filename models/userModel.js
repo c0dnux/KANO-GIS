@@ -52,7 +52,9 @@ const userSchema = new Schema({
   },
   passwordChangedAt: Date,
   confirmToken: String,
-  confirmTokenExpires: String,
+  confirmTokenExpires: Date,
+  refreshToken: { type: String, select: false },
+  refreshTokenExpires: { type: Date, select: false },
   active: {
     type: Boolean,
     default: false,

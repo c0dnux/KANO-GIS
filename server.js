@@ -21,7 +21,10 @@ if (process.env.NODE_ENV === "development") {
 } else {
   DB = DB_ONLINE;
 }
-mongoose.connect(DB).then(() => console.log("DB connection successful!"));
+mongoose.connect(DB).then(() => console.log("DB connection successful!")).catch((err) => {
+  console.log("DB connection failed! 💥", err.name, err.message);
+  process.exit(1);
+});
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {

@@ -107,4 +107,48 @@ module.exports = class Email {
       "Update on your reported crime"
     );
   }
+
+  async sendContactForm(senderName, senderEmail, subject, message) {
+    const html = `
+      <h2>New Contact Form Submission</h2>
+      <p><strong>From:</strong> ${senderName} (${senderEmail})</p>
+      <p><strong>Subject:</strong> ${subject}</p>
+      <hr/>
+      <p>${message}</p>
+    `;
+
+    if (process.env.NODE_ENV === "production") {
+      const emailData = {
+        sender: this.from,
+        to: [{ email: this.to }],
+        subject: `Contact Form: ${subject}`,
+        htmlContent: html,
+      };
+
+      try {
+        await axios.post("https://api.brevo.com/v3/smtp/email", emailData, {
+          headers: {
+            "Content-Type": "application/json",
+            "api-key": process.env.BREVO_API_KEY,
+          },
+        });
+      } catch (error) {
+        console.error("Error sending contact form email:", error.response?.data || error);
+      }
+    } else {
+      const mailOptions = {
+        from: `Crime Watch <${process.env.EMAIL_FROM}>`,
+        to: this.to,
+        subject: `Contact Form: ${subject}`,
+        html,
+        text: htmlToText(html),
+      };
+
+      try {
+        await this.newTransport().sendMail(mailOptions);
+      } catch (error) {
+        console.error("Error sending contact form email:", error);
+      }
+    }
+  }
 };
