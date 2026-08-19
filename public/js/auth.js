@@ -1,4 +1,7 @@
 import { showAlert } from "./alert.js";
+import { getApi } from "./api.js";
+
+const getClient = () => getApi() || axios;
 
 export const auth = async (type, data) => {
   const url =
@@ -11,11 +14,8 @@ export const auth = async (type, data) => {
       : "/api/v1/users/resetPassword";
 
   try {
-    const res = await axios.post(url, data, {
-      withCredentials: true,
-    });
+    const res = await getClient().post(url, data);
     if (res.data.status === "Success") {
-      console.log();
       showAlert("success", res.data.message);
       window.setTimeout(() => {
         if (type === "login" || type === "resetPassword")
@@ -23,17 +23,13 @@ export const auth = async (type, data) => {
       }, 1500);
     }
   } catch (err) {
-    console.log(err);
-
     showAlert("error", err.response.data.message);
   }
 };
 
 export const logout = async () => {
   try {
-    const res = await axios.post("/api/v1/users/logout", {
-      withCredentials: true,
-    });
+    const res = await getClient().post("/api/v1/users/logout");
     if (res.data.status === "Success") {
       showAlert("success", "Goodbye!");
       window.setTimeout(() => {
@@ -46,7 +42,7 @@ export const logout = async () => {
 };
 export const forgetPassword = async (email) => {
   try {
-    const res = await axios.post("/api/v1/users/forgetPassword", { email });
+    const res = await getClient().post("/api/v1/users/forgetPassword", { email });
     if (res.data.status === "Success") {
       showAlert("success", res.data.message);
     }
@@ -56,18 +52,12 @@ export const forgetPassword = async (email) => {
 };
 //////--------REPORT CRIME FORM LOGIC ---------//////
 export const reportCrime = async (formData) => {
-  console.log(formData);
-
   try {
-    const res = await axios.post("/api/v1/crimes/report", formData, {
-      withCredentials: true,
-    });
+    const res = await getClient().post("/api/v1/crimes/report", formData);
     if (res.data.status === "Success") {
       showAlert("success", res.data.message);
     }
   } catch (err) {
-    console.log(err);
-
     showAlert("error", err.response.data.message);
   }
 };
@@ -79,7 +69,6 @@ export const updateReport = async (form, initialData) => {
   const formElements = form.elements;
   const changedData = {};
 
-  // Compare current values with the initial ones passed into the function.
   for (const element of formElements) {
     if (element.name && initialData[element.name] !== element.value) {
       changedData[element.name] = element.value;
@@ -88,7 +77,7 @@ export const updateReport = async (form, initialData) => {
 
   if (Object.keys(changedData).length > 0) {
     try {
-      const res = await axios.patch(
+      const res = await getClient().patch(
         `/api/v1/crimes/crime-update/${reportId}`,
         changedData
       );

@@ -83,6 +83,15 @@ This is a full-stack server-rendered web application that allows citizens to rep
 - Plain text fallback via `html-to-text`
 - Emails for: welcome/confirmation, password reset, crime update notifications
 
+### 2.8 Centralized API Client with Auto-Refresh
+- **`public/js/api.js`** provides a centralized axios instance with `withCredentials: true`
+- **Automatic token refresh** on 401 errors via `/api/v1/users/refresh-token` endpoint
+- **Request queue** handles concurrent requests during token refresh to prevent race conditions
+- **Graceful fallback** redirects to login on refresh failure
+- **Singleton pattern** ensures single axios instance across the application
+- **Auth.js refactored** to use centralized API client, removing redundant `withCredentials` options
+- **Console.log cleanup** removed debug statements from auth.js production code
+
 ### 2.6 Data Export
 - ExcelJS integration for .xlsx export with styled headers
 - Public API endpoint (`/api/v1/crimes/allCrimes`) with dedicated rate limiter
@@ -216,7 +225,7 @@ GIS Project/
 │   ├── *.pug                 # Page templates
 │   └── email/*.pug           # Email templates
 ├── public/
-│   ├── js/                   # Frontend JavaScript (7 files)
+│   ├── js/                   # Frontend JavaScript (8 files, including api.js for centralized API client)
 │   ├── output.css            # Compiled Tailwind CSS
 │   └── *.png, *.jpg          # Static assets
 └── src/
@@ -273,7 +282,7 @@ GIS Project/
 4. **Fix the `UpdateLog` missing import** in `authController.js` `updatePassword`
 5. **Fix undeclared `token` variable** in `isLoggedIn` middleware
 6. **Fix function name typos:** `suspentAccount` -> `suspendAccount`, `dashborad` -> `dashboard`
-7. **Remove dead code:** `email.js`, unused imports, `console.log` statements
+7. ~~**Remove dead code:** `email.js`, unused imports, `console.log` statements~~ **Partially Done:** Console.log statements removed from auth.js; centralized API client added
 8. **Add pagination** to `getAllCrimes` endpoint
 9. **Validate and whitelist update fields** in `updateCrime` instead of `$set: req.body`
 
@@ -302,19 +311,38 @@ GIS Project/
 
 ---
 
-## 7. SUMMARY
+## 7. RECENT CHANGES
+
+### API Client & Auth Refactoring (Latest Update)
+- **Created `public/js/api.js`** - Centralized axios instance with automatic token refresh
+- **Implemented request queue** for handling concurrent requests during token refresh
+- **Refactored `public/js/auth.js`** to use centralized API client
+- **Removed console.log statements** from auth.js for cleaner production code
+- **Fixed script loading order** in `views/authBase.pug` - axios CDN now loads before module scripts
+- **Added axios CDN** to `views/dashBase.pug` for consistent availability
+- **Fixed minor whitespace issue** in `server.js` port variable declaration
+
+### Impact
+- **Automatic token refresh** improves user experience by preventing session expiry during active use
+- **Centralized API configuration** reduces code duplication and ensures consistent request handling
+- **Better error handling** with queue system prevents failed requests during refresh
+- **Cleaner codebase** with removed debug statements and improved organization
+
+---
+
+## 8. SUMMARY
 
 | Aspect | Rating | Notes |
 |--------|--------|-------|
 | Security | 6/10 | Good middleware setup but secrets exposed, weak JWT config |
 | Architecture | 7/10 | Clean MVC, good error handling, but some code quality issues |
 | Features | 8/10 | Comprehensive feature set for a crime reporting system |
-| Code Quality | 5/10 | Typos, dead code, unused imports, inconsistent patterns |
+| Code Quality | 6/10 | Improved with console.log cleanup and centralized API client |
 | Testing | 0/10 | No tests whatsoever |
 | Documentation | 2/10 | No README, no API docs, minimal comments |
 | Performance | 7/10 | Redis caching for API/views/counters, but no pagination |
 | Scalability | 4/10 | Loads all data, no pagination, CDN-based Tailwind |
-| Production Readiness | 4/10 | Nodemon in prod, secrets in repo, no health checks |
-| Overall | 6/10 | Solid prototype/MVP with caching, but security and quality gaps remain |
+| Production Readiness | 5/10 | Nodemon in prod, secrets in repo, no health checks, but API client improved |
+| Overall | 6/10 | Solid prototype/MVP with caching and improved API client, but security and quality gaps remain |
 
-**Verdict:** This is a well-structured MVP/final year project that demonstrates strong understanding of Node.js/Express patterns, security middleware, GIS integration, and now Redis caching. The main concerns are the exposed secrets (critical security issue), lack of tests, and several code quality issues that should be addressed before any production deployment.
+**Verdict:** This is a well-structured MVP/final year project that demonstrates strong understanding of Node.js/Express patterns, security middleware, GIS integration, and Redis caching. Recent improvements include a centralized API client with automatic token refresh and cleaner code. The main concerns are the exposed secrets (critical security issue), lack of tests, and several code quality issues that should be addressed before any production deployment.
