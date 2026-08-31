@@ -7,7 +7,7 @@ const slidingWindow = require("../utils/slidingWindow");
 
 const loginLimiter = slidingWindow({
   windowMs: 5 * 60 * 1000,
-  max: 5,
+  max: 20,
   message: "Too many login attempts. Try again in 5 minutes.",
 });
 

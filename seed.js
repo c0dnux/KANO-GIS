@@ -165,6 +165,141 @@ const sampleCrimes = [
     },
     victims: 2,
   },
+  {
+    description: "Armed robbery at a petrol station. Suspects fled with over 500,000 naira.",
+    crimeType: "Theft",
+    date: new Date("2025-08-07T21:10:00"),
+    status: "Under Investigation",
+    crimeAuth: "Verified",
+    location: {
+      address: "NNPC Filling Station, GSM Village",
+      city: "Kano",
+      localGovernment: "Nassarawa",
+      state: "Kano",
+      coordinates: { type: "Point", coordinates: [8.545, 11.985] },
+    },
+    victims: 3,
+  },
+  {
+    description: "Fraudulent land deal reported. Victim lost over 2 million naira in fake allocation.",
+    crimeType: "Fraud",
+    date: new Date("2025-08-08T10:00:00"),
+    status: "Under Investigation",
+    crimeAuth: "Pending",
+    location: {
+      address: "Hotoro GRA",
+      city: "Kano",
+      localGovernment: "Kano Municipal",
+      state: "Kano",
+      coordinates: { type: "Point", coordinates: [8.56, 12.0] },
+    },
+    victims: 1,
+  },
+  {
+    description: "Multiple vehicles set on fire during a protest. Property damage extensive.",
+    crimeType: "Vandalism",
+    date: new Date("2025-08-09T15:30:00"),
+    status: "Unknown",
+    crimeAuth: "Pending",
+    location: {
+      address: "Farm Center Roundabout",
+      city: "Kano",
+      localGovernment: "Kano Municipal",
+      state: "Kano",
+      coordinates: { type: "Point", coordinates: [8.53, 12.01] },
+    },
+    victims: 0,
+  },
+  {
+    description: "Hit-and-run incident on a busy highway. Victim hospitalized with critical injuries.",
+    crimeType: "Assault",
+    date: new Date("2025-08-10T07:45:00"),
+    status: "Under Investigation",
+    crimeAuth: "Verified",
+    location: {
+      address: "Kano-Kaduna Expressway",
+      city: "Kano",
+      localGovernment: "Ungogo",
+      state: "Kano",
+      coordinates: { type: "Point", coordinates: [8.49, 12.03] },
+    },
+    victims: 1,
+  },
+  {
+    description: "Attempted kidnapping of a school child. Child was rescued by bystanders.",
+    crimeType: "Kidnapping",
+    date: new Date("2025-08-11T13:00:00"),
+    status: "Resolved",
+    crimeAuth: "Verified",
+    location: {
+      address: "Tudun Murtala Primary School",
+      city: "Kano",
+      localGovernment: "Tarauni",
+      state: "Kano",
+      coordinates: { type: "Point", coordinates: [8.535, 11.995] },
+    },
+    victims: 1,
+  },
+  {
+    description: "Shooting reported near a night club. Two people injured.",
+    crimeType: "Murder",
+    date: new Date("2025-08-12T02:15:00"),
+    status: "Under Investigation",
+    crimeAuth: "Pending",
+    location: {
+      address: "Club Road, GRA",
+      city: "Kano",
+      localGovernment: "Kano Municipal",
+      state: "Kano",
+      coordinates: { type: "Point", coordinates: [8.52, 12.015] },
+    },
+    victims: 2,
+  },
+  {
+    description: "Internet cafe used for identity theft. Over 50 victims identified.",
+    crimeType: "Fraud",
+    date: new Date("2025-08-14T11:30:00"),
+    status: "Under Investigation",
+    crimeAuth: "Verified",
+    location: {
+      address: "Sabon Gari Market Area",
+      city: "Kano",
+      localGovernment: "Fagge",
+      state: "Kano",
+      coordinates: { type: "Point", coordinates: [8.515, 12.005] },
+    },
+    victims: 50,
+  },
+  {
+    description: "Motorcycle stolen from outside a mosque during Friday prayers.",
+    crimeType: "Theft",
+    date: new Date("2025-08-15T12:45:00"),
+    status: "Unknown",
+    crimeAuth: "Pending",
+    location: {
+      address: "Central Mosque, Kofar Mata",
+      city: "Kano",
+      localGovernment: "Kano Municipal",
+      state: "Kano",
+      coordinates: { type: "Point", coordinates: [8.518, 12.008] },
+    },
+    victims: 1,
+  },
+  {
+    description: "Chemical spill from a tanker truck blocking major road. Environmental hazard reported.",
+    crimeType: "Other",
+    date: new Date("2025-08-16T09:00:00"),
+    status: "Under Investigation",
+    crimeAuth: "Verified",
+    location: {
+      address: "Jakara Bridge",
+      city: "Kano",
+      localGovernment: "Kano Municipal",
+      state: "Kano",
+      coordinates: { type: "Point", coordinates: [8.51, 12.01] },
+    },
+    victims: 0,
+  },
 ];
 
 async function seed() {
@@ -179,25 +314,15 @@ async function seed() {
     await Notification.deleteMany({});
     console.log("Cleared existing data.");
 
-    // Create admin user
-    const admin = await User.create({
-      name: "Admin User",
-      email: "admin@crimerepo.com",
-      password: "admin1234",
-      confirmPassword: "admin1234",
-      role: "admin",
-      active: true,
-      accessStatus: { status: "granted" },
-    });
-    console.log(`Admin created: ${admin.email} (id: ${admin._id})`);
+  
 
-    // Create the requested user
+    // Create Admin
     const user = await User.create({
       name: "Sani Abdulrahman",
       email: "saniabdulrahman851@gmial.com",
       password: "password123",
       confirmPassword: "password123",
-      role: "user",
+      role: "admin",
       active: true,
       accessStatus: { status: "granted" },
     });

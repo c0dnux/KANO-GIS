@@ -231,5 +231,5 @@ export const initializeCrimeMap = (crimeData) => {
 
   // --- INITIAL RENDER ---
   populateCrimeCheckboxes();
-  map.addLayer(markerCluster);
+  switchToLayer(currentMode, crimeData);
 };
