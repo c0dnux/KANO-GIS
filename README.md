@@ -6,12 +6,10 @@
 *Report it. Map it. Act on it.*
 
 
-![Screenshot 1](https://github.com/c0dnux/KANO-GIS/raw/9b946d9f30bf76caeed8e3512af55e74d1d019f1/Screenshot_2026-08-31_13-18-40.png)
-![Screenshot 2](https://github.com/c0dnux/KANO-GIS/raw/9b946d9f30bf76caeed8e3512af55e74d1d019f1/Screenshot_2026-08-31_13-19-44.png)
-![Screenshot 3](https://github.com/c0dnux/KANO-GIS/raw/9b946d9f30bf76caeed8e3512af55e74d1d019f1/Screenshot_2026-08-31_13-21-22.png)
-![Screenshot 4](https://github.com/c0dnux/KANO-GIS/raw/9b946d9f30bf76caeed8e3512af55e74d1d019f1/Screenshot_2026-08-31_13-21-52.png)
-![Screenshot 5](https://github.com/c0dnux/KANO-GIS/raw/9b946d9f30bf76caeed8e3512af55e74d1d019f1/Screenshot_2026-08-31_13-22-04.png)
-![Screenshot 6](https://github.com/c0dnux/KANO-GIS/raw/9b946d9f30bf76caeed8e3512af55e74d1d019f1/Screenshot_2026-08-31_13-22-42.png)
+| | | |
+|:---:|:---:|:---:|
+| ![Screenshot 1](https://github.com/c0dnux/KANO-GIS/raw/9b946d9f30bf76caeed8e3512af55e74d1d019f1/Screenshot_2026-08-31_13-18-40.png) | ![Screenshot 2](https://github.com/c0dnux/KANO-GIS/raw/9b946d9f30bf76caeed8e3512af55e74d1d019f1/Screenshot_2026-08-31_13-19-44.png) | ![Screenshot 3](https://github.com/c0dnux/KANO-GIS/raw/9b946d9f30bf76caeed8e3512af55e74d1d019f1/Screenshot_2026-08-31_13-21-22.png) |
+| ![Screenshot 4](https://github.com/c0dnux/KANO-GIS/raw/9b946d9f30bf76caeed8e3512af55e74d1d019f1/Screenshot_2026-08-31_13-21-52.png) | ![Screenshot 5](https://github.com/c0dnux/KANO-GIS/raw/9b946d9f30bf76caeed8e3512af55e74d1d019f1/Screenshot_2026-08-31_13-22-04.png) | ![Screenshot 6](https://github.com/c0dnux/KANO-GIS/raw/9b946d9f30bf76caeed8e3512af55e74d1d019f1/Screenshot_2026-08-31_13-22-42.png) |
 
 </div>
 
